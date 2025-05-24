@@ -42,19 +42,6 @@ typedef struct
 } Jugador;
 
 /**
-     Compara dos claves de tipo string para determinar si son iguales.
-     Esta función se utiliza para inicializar mapas con claves de tipo string.
-
-     @param key1 Primer puntero a la clave string.
-     @param key2 Segundo puntero a la clave string.
-     @return Retorna 1 si las claves son iguales, 0 de lo contrario.
-*/
-int is_equal_str(void *key1, void *key2)
-{
-    return strcmp((char *)key1, (char *)key2) == 0;
-}
-
-/**
     Compara dos claves de tipo entero para determinar si son iguales.
     Esta función se utiliza para inicializar mapas con claves de tipo entero.
 
@@ -107,13 +94,14 @@ void mostrar_menu(int menu)
 {
     if (menu == 1)
     {
-        puts("========================================");
-        puts("             GraphQuest");
-        puts("========================================");
-        puts("1) Cargar Laberinto desde Archivo CSV");
-        puts("2) Iniciar Partida: Solitario");
-        puts("3) Iniciar Partida: Multijugador");
-        puts("4) Salir");
+        puts("+--------------------------------------+");
+        puts("|              GraphQuest              |");
+        puts("+--------------------------------------+");
+        puts("| 1) Cargar Laberinto                  |");
+        puts("| 2) Iniciar Partida: Solitario        |");
+        puts("| 3) Iniciar Partida: Multijugador     |");
+        puts("| 4) Salir del Juego                   |");
+        puts("+--------------------------------------+");
     }
     else if (menu == 2)
     {
@@ -121,8 +109,9 @@ void mostrar_menu(int menu)
         puts("1) Recoger Item(s)");
         puts("2) Descartar Item(s)");
         puts("3) Avanzar");
-        puts("4) Reinicar Partida");
-        puts("5) Salir");
+        puts("4) Reiniciar Partida");
+        puts("5) Volver al Menu Principal");
+        puts("========================================");
     }
 }
 
@@ -135,11 +124,19 @@ Map* map_copia_superficial(Map* original, int (*is_equal)(void*, void*)) {
     return copia;
 }
 
+void conectar_escenario(Map* escenarios, Escenario* esc, int* id, Escenario** direccion)
+{
+    if (id && *id != -1) {
+        MapPair* par_dest = map_search(escenarios, id);
+        *direccion = par_dest ? (Escenario*)par_dest->value : NULL;
+    }
+}
+
 void cargar_lab(Map* escenarios)
 {
     if (map_first(escenarios) != NULL)
     {
-        printf("Ya ha sido cargado el CSV");
+        puts("Ya ha sido cargado el CSV");
         return;
     }
 
@@ -150,7 +147,7 @@ void cargar_lab(Map* escenarios)
         return;
     }
 
-    leer_linea_csv(archivo, ','); // Saltar encabezados
+    leer_linea_csv(archivo, ',');
 
     Map* conexiones_ids = map_create(is_equal_int);
     int id_objeto = 1; // Contador global de IDs de objetos
@@ -177,6 +174,7 @@ void cargar_lab(Map* escenarios)
             if (list_size(values) < 3) continue;
 
             Objeto* obj = (Objeto*) malloc(sizeof(Objeto));
+
             char* val0 = list_first(values);
             char* val1 = list_next(values);
             char* val2 = list_next(values);
@@ -184,13 +182,9 @@ void cargar_lab(Map* escenarios)
             obj->nombre = strdup(val0);
             obj->puntos = atoi(val1);
             obj->peso = atoi(val2);
-            obj->id = id_objeto++; // Asigna un ID único al objeto
+            obj->id = id_objeto++;
 
             list_pushBack(escenario->objetos, obj);
-
-            //Liberar valores
-            for (char* val = list_first(values); val != NULL; val = list_next(values))
-                free(val);
 
             list_clean(values);
             free(values);
@@ -204,6 +198,7 @@ void cargar_lab(Map* escenarios)
         int *abajo = (int*)malloc(sizeof(int)); *abajo = atoi(campos[5]);
         int *izq = (int*)malloc(sizeof(int)); *izq = atoi(campos[6]);
         int *der = (int*)malloc(sizeof(int)); *der = atoi(campos[7]);
+
         list_pushBack(ids, arriba);
         list_pushBack(ids, abajo);
         list_pushBack(ids, izq);
@@ -222,16 +217,19 @@ void cargar_lab(Map* escenarios)
     Map* conexiones_ids_copia = map_copia_superficial(conexiones_ids, is_equal_int);
 
     MapPair* par_con = map_first(conexiones_ids_copia);
-    while (par_con) {
+    while (par_con) 
+    {
         int* id_clave = par_con->key;
         List* ids = (List*)par_con->value;
 
         // Busca el escenario original
         MapPair* par_esc = map_search(escenarios, id_clave);
-        if (!par_esc) {
+        if (!par_esc) 
+        {
             par_con = map_next(conexiones_ids_copia);
             continue;
         }
+
         Escenario* esc = (Escenario*)par_esc->value;
 
         int* id_arriba = list_first(ids);
@@ -241,44 +239,20 @@ void cargar_lab(Map* escenarios)
 
         MapPair* par_dest;
 
-        if (id_arriba && *id_arriba != -1) {
-            par_dest = map_search(escenarios, id_arriba);
-            esc->arriba = par_dest ? (Escenario*)par_dest->value : NULL;
-        }
-        if (id_abajo && *id_abajo != -1) {
-            par_dest = map_search(escenarios, id_abajo);
-            esc->abajo = par_dest ? (Escenario*)par_dest->value : NULL;
-        }
-        if (id_izquierda && *id_izquierda != -1) {
-            par_dest = map_search(escenarios, id_izquierda);
-            esc->izquierda = par_dest ? (Escenario*)par_dest->value : NULL;
-        }
-        if (id_derecha && *id_derecha != -1) {
-            par_dest = map_search(escenarios, id_derecha);
-            esc->derecha = par_dest ? (Escenario*)par_dest->value : NULL;
-        }
+        conectar_escenario(escenarios, esc, id_arriba, &esc->arriba);
+        conectar_escenario(escenarios, esc, id_abajo, &esc->abajo);
+        conectar_escenario(escenarios, esc, id_izquierda, &esc->izquierda);
+        conectar_escenario(escenarios, esc, id_derecha, &esc->derecha);
 
         par_con = map_next(conexiones_ids_copia);
     }
 
-    // Luego puedes liberar la copia si quieres
     map_clean(conexiones_ids_copia);
     free(conexiones_ids_copia);
-
-    // Liberar conexiones_ids y sus int* internos
-    MapPair* par = map_first(conexiones_ids);
-    while (par)
-    {
-        List* ids = (List*) par->value;
-        for (int* id = list_first(ids); id != NULL; id = list_next(ids))
-            free(id);
-        list_clean(ids);
-        free(ids);
-        free(par->key); // liberar clave int*
-        par = map_next(conexiones_ids);
-    }
     map_clean(conexiones_ids);
-    free(conexiones_ids);  // Liberar el mapa conexiones_ids
+    free(conexiones_ids);
+
+    puts("Laberinto cargado exitosamente.");
 }
 
 void iniciar_jugadores(int cantidad, Jugador* player1, Jugador* player2)
@@ -299,6 +273,35 @@ void iniciar_jugadores(int cantidad, Jugador* player1, Jugador* player2)
         player2->escenario_actual = NULL;
         player2->terminado = 0;
     }
+}
+
+int mostrar_objetos(List* items, int tipo)
+{
+    if (tipo == 1)
+    {
+        int hay_inventario = 0;
+        for (Objeto* item = list_first(items) ; item != NULL ; item = list_next(items))
+        {
+            printf("| - #%02d / %-20s |\n", item->id, item->nombre);
+            printf("|   Peso: %-2d  /  Puntos: %-2d    |\n", item->peso, item->puntos);
+            puts("|                              |");
+            hay_inventario = 1;
+        }
+
+        return hay_inventario;
+    }
+    else if (tipo == 2)
+    {
+        for (Objeto* obj = list_first(items); obj != NULL; obj = list_next(items))
+            printf("  #%02d - %s (Peso: %d, Puntos: %d)\n", obj->id, obj->nombre, obj->peso, obj->puntos);
+    }
+}
+
+void mostrar_terminado(Jugador* player)
+{
+    puts("Inventario final:");
+    mostrar_objetos(player->inventario, 2);
+    printf("Puntaje final: %d\n", player->puntaje);
 }
 
 void mostrar_estado(Jugador* jugador)
@@ -334,34 +337,17 @@ void mostrar_estado(Jugador* jugador)
 
     puts("|                              |");
     puts("| Objetos Disponibles:         |");
-    int hay_objetos = 0;
-    for (Objeto* item = list_first(escenario_actual->objetos) ; item != NULL ; item = list_next(escenario_actual->objetos))
-    {
-        printf("| - #%02d / %-20s |\n", item->id, item->nombre);
-        printf("|   Peso: %-2d  -  Puntos: %-2d    |\n", item->peso, item->puntos);
-        puts("|                              |");
-        hay_objetos = 1;
-    }
-    if (!hay_objetos) puts("| - (Sin Items Disponibles)    |");
+    int hay_objetos = mostrar_objetos(escenario_actual->objetos, 1);
+    if (hay_objetos == 0) puts("| - (Sin Items Disponibles)    |");
     puts("+------------------------------+");
 
     puts("\n+------------------------------+");
     puts("| JUGADOR                      |");
     puts("+------------------------------+");
-    int peso_total = 0, puntaje_total = 0, hay_inventario = 0;
-    for (Objeto* item = list_first(jugador->inventario) ; item != NULL ; item = list_next(jugador->inventario))
-    {
-        printf("| - #%02d / %-20s |\n", item->id, item->nombre);
-        printf("|   Peso: %-2d  /  Puntos: %-2d    |\n", item->peso, item->puntos);
-        puts("|                              |");
-        peso_total += item->peso;
-        puntaje_total += item->puntos;
-        hay_inventario = 1;
-    }
+    int hay_inventario = mostrar_objetos(jugador->inventario, 1);
     if (!hay_inventario) puts("| (Inventario Vacio)           |");
-
-    printf("| Peso Total: %-16d |\n", peso_total);
-    printf("| Puntaje Acumulado: %-9d |\n", puntaje_total);
+    printf("| Peso Total: %-16d |\n", jugador->peso_actual);
+    printf("| Puntaje Acumulado: %-9d |\n", jugador->puntaje);
     printf("| Tiempo Restante: %-11d |\n", jugador->tiempo);
     puts("+------------------------------+");
     printf("\n");
@@ -370,71 +356,88 @@ void mostrar_estado(Jugador* jugador)
 void recoger_items(Jugador* jugador)
 {
     Escenario* esc = jugador->escenario_actual;
-    if (list_first(esc->objetos) == NULL) {
+    if (list_first(esc->objetos) == NULL) 
+    {
         printf("No hay objetos para recoger en este escenario.\n");
         return;
     }
 
     puts("\nObjetos disponibles para recoger:");
-    for (Objeto* obj = list_first(esc->objetos); obj != NULL; obj = list_next(esc->objetos)) {
-        printf("  #%02d - %s (Peso: %d, Puntos: %d)\n", obj->id, obj->nombre, obj->peso, obj->puntos);
-    }
+    mostrar_objetos(esc->objetos, 2);
 
     printf("Ingrese el ID del objeto a recoger (0 para cancelar): ");
     int id_elegido;
     scanf("%d", &id_elegido);
 
     if (id_elegido == 0) {
-        printf("Acción cancelada.\n");
+        puts("Accion cancelada.");
         return;
     }
 
     // Buscar el objeto por ID
-    for (Objeto* obj = list_first(esc->objetos); obj != NULL; obj = list_next(esc->objetos)) {
-        if (obj->id == id_elegido) {
+    for (Objeto* obj = list_first(esc->objetos); obj != NULL; obj = list_next(esc->objetos)) 
+    {
+        if (obj->id == id_elegido) 
+        {
             list_pushBack(jugador->inventario, obj);
             jugador->peso_actual += obj->peso;
             jugador->puntaje += obj->puntos;
-            list_popCurrent(esc->objetos); // Elimina el objeto del escenario
-            printf("¡Has recogido %s!\n", obj->nombre);
+            jugador->tiempo -= 1;
+            list_popCurrent(esc->objetos);
+            printf("Has recogido: %s\n", obj->nombre);
+            printf("Tiempo Restante: %d - 1 = %d", jugador->tiempo + 1, jugador->tiempo);
+
+            if (jugador->tiempo <= 0)
+            {
+                puts("DERROTA - Se ha agotado el tiempo");
+                jugador->terminado = 1;
+            }
+
             return;
         }
     }
 
-    printf("No existe un objeto con ese ID en este escenario.\n");
+    puts("No existe un objeto con ese ID en este escenario.");
 }
 
 void descartar_items(Jugador* jugador)
 {
-    if (list_first(jugador->inventario) == NULL) {
+    if (list_first(jugador->inventario) == NULL) 
+    {
         printf("No tienes objetos en tu inventario para descartar.\n");
         return;
     }
 
     puts("\nObjetos en tu inventario:");
-    for (Objeto* obj = list_first(jugador->inventario); obj != NULL; obj = list_next(jugador->inventario)) {
-        printf("  #%02d - %s (Peso: %d, Puntos: %d)\n", obj->id, obj->nombre, obj->peso, obj->puntos);
-    }
+    mostrar_objetos(jugador->inventario, 2);
 
     printf("Ingrese el ID del objeto a descartar (0 para cancelar): ");
     int id_elegido;
     scanf("%d", &id_elegido);
 
     if (id_elegido == 0) {
-        printf("Acción cancelada.\n");
+        printf("Accion cancelada.\n");
         return;
     }
 
     // Buscar el objeto por ID
-    for (Objeto* obj = list_first(jugador->inventario); obj != NULL; obj = list_next(jugador->inventario)) {
-        if (obj->id == id_elegido) {
+    for (Objeto* obj = list_first(jugador->inventario); obj != NULL; obj = list_next(jugador->inventario)) 
+    {
+        if (obj->id == id_elegido) 
+        {
             jugador->peso_actual -= obj->peso;
             jugador->puntaje -= obj->puntos;
             list_popCurrent(jugador->inventario); // Elimina el objeto del inventario
-            printf("Has descartado %s.\n", obj->nombre);
+            printf("Has descartado: %s.\n", obj->nombre);
             jugador->tiempo -= 1;
-            if (jugador->tiempo < 0) jugador->tiempo = 0;
-            printf("Se ha descontado 1 de tiempo. Tiempo restante: %d\n", jugador->tiempo);
+            printf("Tiempo Restante: %d - 1 = %d\n", jugador->tiempo + 1, jugador->tiempo);
+
+            if (jugador->tiempo <= 0)
+            {
+                puts("DERROTA - Se ha agotado el tiempo");
+                jugador->terminado = 1;
+            }
+
             return;
         }
     }
@@ -486,7 +489,19 @@ void avanzar(Jugador* jugador)
     printf("Tiempo restante: %d\n", jugador->tiempo);
 
     // Revisar si se acabó el tiempo
-    if (jugador->tiempo <= 0) {
+    int en_final = (jugador->escenario_actual->is_final && strcmp(jugador->escenario_actual->is_final, "Si") == 0);
+    int sin_tiempo = (jugador->tiempo <= 0);
+
+    if (en_final && sin_tiempo) {
+        printf("\n¡Has llegado al escenario final justo cuando se agotó el tiempo!\n");
+        printf("Inventario final:\n");
+        for (Objeto* item = list_first(jugador->inventario); item != NULL; item = list_next(jugador->inventario))
+            printf("  #%02d - %s (Puntos: %d)\n", item->id, item->nombre, item->puntos);
+        printf("Puntaje final: %d\n", jugador->puntaje);
+        jugador->terminado = 1;
+        return;
+    }
+    if (sin_tiempo) {
         printf("\n¡Se ha agotado el tiempo! Has perdido.\n");
         printf("Inventario final:\n");
         for (Objeto* item = list_first(jugador->inventario); item != NULL; item = list_next(jugador->inventario))
@@ -495,9 +510,7 @@ void avanzar(Jugador* jugador)
         jugador->terminado = 1;
         return;
     }
-
-    // Revisar si es escenario final
-    if (jugador->escenario_actual->is_final && strcmp(jugador->escenario_actual->is_final, "Si") == 0) {
+    if (en_final) {
         printf("\n¡Has llegado al escenario final!\n");
         printf("Inventario final:\n");
         for (Objeto* item = list_first(jugador->inventario); item != NULL; item = list_next(jugador->inventario))
@@ -544,12 +557,15 @@ void empezar_juego(Map* escenarios, int jugadores)
 
     int turno = 1;
     char opcion;
-    do
+    
+    while(1)
     {
         Jugador* actual = (turno == 1) ? player1 : player2;
-        if (actual->terminado) {
+        if (actual->terminado) 
+        {
             printf("El Jugador %d ya terminó su partida.\n", turno);
-            if (jugadores == 2) turno = (turno == 1) ? 2 : 1;
+            if (jugadores == 2 && player1->terminado) turno = 2;
+            if (jugadores == 2 && player2->terminado) turno = 1;
             continue;
         }
 
@@ -581,9 +597,17 @@ void empezar_juego(Map* escenarios, int jugadores)
             case '4':
                 reiniciar_partida(jugadores, player1, player2, escenarios);
                 break;
+            case '5':
+                return;
         }
 
-        if (jugadores == 2) turno = (turno == 1) ? 2 : 1;
+        if (jugadores == 2 && ((player1->terminado && !player2->terminado)
+            || (player2->terminado && !player1->terminado)))
+        {
+            mostrar_terminado(actual);
+        }
+
+        if (jugadores == 2 && !player1->terminado && !player2->terminado) turno = (turno == 1) ? 2 : 1;
 
         if (jugadores == 2 && player1->terminado && player2->terminado) {
             printf("\n=== ¡Ambos jugadores han terminado! ===\n");
@@ -602,22 +626,8 @@ void empezar_juego(Map* escenarios, int jugadores)
         }
         presioneTeclaParaContinuar();
         limpiarPantalla();
-    } while (opcion != '5');
-    
-}
-
-void depurar_escenarios(Map* escenarios)
-{
-    for (MapPair* par = map_first(escenarios); par != NULL; par = map_next(escenarios))
-    {
-        Escenario* esc = (Escenario*)par->value;
-        printf("Escenario %d (%s):\n", esc->id, esc->nombre);
-        printf("  ARRIBA    -> %s\n", esc->arriba ? esc->arriba->nombre : "(sin conexion)");
-        printf("  ABAJO     -> %s\n", esc->abajo ? esc->abajo->nombre : "(sin conexion)");
-        printf("  IZQUIERDA -> %s\n", esc->izquierda ? esc->izquierda->nombre : "(sin conexion)");
-        printf("  DERECHA   -> %s\n", esc->derecha ? esc->derecha->nombre : "(sin conexion)");
-        printf("\n");
     }
+    
 }
 
 int main()
@@ -631,14 +641,13 @@ int main()
     {
         mostrar_menu(1);
     
-        printf("Ingrese su opción: ");
+        printf("Ingrese su opcion: ");
         scanf(" %c", &opcion);
     
         switch (opcion) 
         {
             case '1':
                 cargar_lab(mapa_escenarios);
-                depurar_escenarios(mapa_escenarios);
                 break;
             case '2':
                 empezar_juego(mapa_escenarios, 1);
