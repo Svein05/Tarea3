@@ -39,6 +39,7 @@ typedef struct
     int puntaje;
     int tiempo;
     int terminado;
+    int llego_al_final;
 } Jugador;
 
 /**
@@ -113,6 +114,191 @@ void mostrar_menu(int menu)
         puts("5) Volver al Menu Principal");
         puts("========================================");
     }
+}
+
+int mostrar_objetos(List* items, int tipo)
+{
+    if (tipo == 1)
+    {
+        int hay_inventario = 0;
+        for (Objeto* item = list_first(items) ; item != NULL ; item = list_next(items))
+        {
+            printf("| - #%02d / %-20s |\n", item->id, item->nombre);
+            printf("|   Peso: %-2d  /  Puntos: %-2d    |\n", item->peso, item->puntos);
+            puts("|                              |");
+            hay_inventario = 1;
+        }
+
+        return hay_inventario;
+    }
+    else if (tipo == 2)
+    {
+        for (Objeto* obj = list_first(items); obj != NULL; obj = list_next(items))
+            printf("  #%02d - %s (Peso: %d, Puntos: %d)\n", obj->id, obj->nombre, obj->peso, obj->puntos);
+    }
+}
+
+void mostrar_terminado(Jugador* player)
+{
+    puts("Inventario final:");
+    mostrar_objetos(player->inventario, 2);
+    printf("Puntaje final: %d\n", player->puntaje);
+}
+
+void mostrar_estado(Jugador* jugador)
+{
+    Escenario* escenario_actual = jugador->escenario_actual;
+
+    puts("+------------------------------+");
+    puts("| ESCENARIO                    |");
+    puts("+------------------------------+");
+    printf("| %-28s |\n", escenario_actual->nombre);
+    puts("|                              |");
+    imprimir_con_formato(escenario_actual->descripcion);
+    puts("|                              |");
+    puts("| Acciones Posibles:           |");
+
+    const char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
+    Escenario* conexiones[] = {
+        escenario_actual->arriba,
+        escenario_actual->abajo,
+        escenario_actual->izquierda,
+        escenario_actual->derecha
+    };
+    int hay_direccion = 0;
+    for (int i = 0; i < 4; i++) 
+    {
+        if (conexiones[i]) 
+        {
+            printf("| - %-26s |\n", dirs[i]);
+            hay_direccion = 1;
+        }
+    }
+    if (!hay_direccion) puts("| - (Ninguna)                  |\n");
+
+    puts("|                              |");
+    puts("| Objetos Disponibles:         |");
+    int hay_objetos = mostrar_objetos(escenario_actual->objetos, 1);
+    if (hay_objetos == 0) puts("| - (Sin Items Disponibles)    |");
+    puts("+------------------------------+");
+
+    puts("\n+------------------------------+");
+    puts("| JUGADOR                      |");
+    puts("+------------------------------+");
+    int hay_inventario = mostrar_objetos(jugador->inventario, 1);
+    if (!hay_inventario) puts("| (Inventario Vacio)           |");
+    printf("| Peso Total: %-16d |\n", jugador->peso_actual);
+    printf("| Puntaje Acumulado: %-9d |\n", jugador->puntaje);
+    printf("| Tiempo Restante: %-11d |\n", jugador->tiempo);
+    puts("+------------------------------+");
+    printf("\n");
+}
+
+void mostrar_multijugador_terminado(Jugador* player1, Jugador* player2)
+{
+    int puntaje1 = player1->puntaje;
+    int puntaje2 = player2->puntaje;
+    int llego1 = player1->llego_al_final;
+    int llego2 = player2->llego_al_final;
+
+    puts("+------------------------------+");
+    puts("|    EL JUEGO HA FINALIZADO    |");
+    puts("+------------------------------+");
+
+    puts("\n+------------------------------+");
+    puts("| JUGADOR 1                    |");
+    puts("+------------------------------+");
+    int hay_inventario1 = mostrar_objetos(player1->inventario, 1);
+    if (!hay_inventario1) puts("| (Inventario Vacio)           |");
+    printf("| Puntaje Acumulado: %-9d |\n", puntaje1);
+    printf("| Llego al Final? %s\n", (llego1 == 1) ? "SI" : "NO");
+    puts("+------------------------------+\n");
+
+    puts("+------------------------------+");
+    puts("| JUGADOR 2                    |");
+    puts("+------------------------------+");
+    int hay_inventario2 = mostrar_objetos(player2->inventario, 1);
+    if (!hay_inventario2) puts("| (Inventario Vacio)           |");
+    printf("| Puntaje Acumulado: %-9d |\n", puntaje2);
+    printf("| Llego al Final? %s\n", (llego2 == 1) ? "SI" : "NO");
+    puts("+------------------------------+\n");
+
+    puts("+------------------------------+");
+    if (llego1 && !llego2)
+        printf("|   EL JUGADOR 1 HA GANADO!    |\n");
+    else if (!llego1 && llego2)
+        printf("|   EL JUGADOR 2 HA GANADO!    |\n");
+    else if (!llego1 && !llego2)
+        printf("|   NADIE GANO (NINGUNO LLEGO) |\n");
+    else if (puntaje1 > puntaje2)
+        printf("|   EL JUGADOR 1 HA GANADO!    |\n");
+    else if (puntaje2 > puntaje1)
+        printf("|   EL JUGADOR 2 HA GANADO!    |\n");
+    else
+        printf("|        EMPATE EN PUNTOS      |\n");
+    puts("+------------------------------+");
+}
+
+void iniciar_jugadores(int cantidad, Jugador* player1, Jugador* player2)
+{
+    player1->inventario = list_create();
+    player1->peso_actual = 0;
+    player1->puntaje = 0;
+    player1->tiempo = 4;
+    player1->escenario_actual = NULL;
+    player1->terminado = 0;
+    player1->llego_al_final = 0;
+
+    if (cantidad == 2 && player2 != NULL)
+    {
+        player2->inventario = list_create();
+        player2->peso_actual = 0;
+        player2->puntaje = 0;
+        player2->tiempo = 2;
+        player2->escenario_actual = NULL;
+        player2->terminado = 0;
+        player2->llego_al_final = 0;
+    }
+}
+
+void liberar_inventario(List* inventario) {
+    if (!inventario) return;
+    list_clean(inventario);
+    free(inventario);
+}
+
+void liberar_jugador(Jugador* jugador) {
+    if (!jugador) return;
+    liberar_inventario(jugador->inventario);
+    free(jugador);
+}
+
+void liberar_objetos(List* lista) {
+    if (!lista) return;
+    Objeto* obj = list_first(lista);
+    while (obj) {
+        free(obj->nombre);
+        free(obj);
+        obj = list_next(lista);
+    }
+    list_clean(lista);
+    free(lista);
+}
+
+void liberar_escenarios(Map* escenarios) {
+    if (!escenarios) return;
+    MapPair* par = map_first(escenarios);
+    while (par) {
+        Escenario* esc = (Escenario*)par->value;
+        free(esc->nombre);
+        free(esc->descripcion);
+        free(esc->is_final);
+        liberar_objetos(esc->objetos);
+        free(esc);
+        par = map_next(escenarios);
+    }
+    map_clean(escenarios);
+    free(escenarios);
 }
 
 Map* map_copia_superficial(Map* original, int (*is_equal)(void*, void*)) {
@@ -237,8 +423,6 @@ void cargar_lab(Map* escenarios)
         int* id_izquierda = list_next(ids);
         int* id_derecha = list_next(ids);
 
-        MapPair* par_dest;
-
         conectar_escenario(escenarios, esc, id_arriba, &esc->arriba);
         conectar_escenario(escenarios, esc, id_abajo, &esc->abajo);
         conectar_escenario(escenarios, esc, id_izquierda, &esc->izquierda);
@@ -255,123 +439,29 @@ void cargar_lab(Map* escenarios)
     puts("Laberinto cargado exitosamente.");
 }
 
-void iniciar_jugadores(int cantidad, Jugador* player1, Jugador* player2)
-{
-    player1->inventario = list_create();
-    player1->peso_actual = 0;
-    player1->puntaje = 0;
-    player1->tiempo = 10;
-    player1->escenario_actual = NULL;
-    player1->terminado = 0;
-
-    if (cantidad == 2 && player2 != NULL)
-    {
-        player2->inventario = list_create();
-        player2->peso_actual = 0;
-        player2->puntaje = 0;
-        player2->tiempo = 10;
-        player2->escenario_actual = NULL;
-        player2->terminado = 0;
-    }
-}
-
-int mostrar_objetos(List* items, int tipo)
-{
-    if (tipo == 1)
-    {
-        int hay_inventario = 0;
-        for (Objeto* item = list_first(items) ; item != NULL ; item = list_next(items))
-        {
-            printf("| - #%02d / %-20s |\n", item->id, item->nombre);
-            printf("|   Peso: %-2d  /  Puntos: %-2d    |\n", item->peso, item->puntos);
-            puts("|                              |");
-            hay_inventario = 1;
-        }
-
-        return hay_inventario;
-    }
-    else if (tipo == 2)
-    {
-        for (Objeto* obj = list_first(items); obj != NULL; obj = list_next(items))
-            printf("  #%02d - %s (Peso: %d, Puntos: %d)\n", obj->id, obj->nombre, obj->peso, obj->puntos);
-    }
-}
-
-void mostrar_terminado(Jugador* player)
-{
-    puts("Inventario final:");
-    mostrar_objetos(player->inventario, 2);
-    printf("Puntaje final: %d\n", player->puntaje);
-}
-
-void mostrar_estado(Jugador* jugador)
-{
-    Escenario* escenario_actual = jugador->escenario_actual;
-
-    puts("+------------------------------+");
-    puts("| ESCENARIO                    |");
-    puts("+------------------------------+");
-    printf("| %-28s |\n", escenario_actual->nombre);
-    puts("|                              |");
-    imprimir_con_formato(escenario_actual->descripcion);
-    puts("|                              |");
-    puts("| Acciones Posibles:           |");
-
-    const char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
-    Escenario* conexiones[] = {
-        escenario_actual->arriba,
-        escenario_actual->abajo,
-        escenario_actual->izquierda,
-        escenario_actual->derecha
-    };
-    int hay_direccion = 0;
-    for (int i = 0; i < 4; i++) 
-    {
-        if (conexiones[i]) 
-        {
-            printf("| - %-26s |\n", dirs[i]);
-            hay_direccion = 1;
-        }
-    }
-    if (!hay_direccion) puts("| - (Ninguna)                  |\n");
-
-    puts("|                              |");
-    puts("| Objetos Disponibles:         |");
-    int hay_objetos = mostrar_objetos(escenario_actual->objetos, 1);
-    if (hay_objetos == 0) puts("| - (Sin Items Disponibles)    |");
-    puts("+------------------------------+");
-
-    puts("\n+------------------------------+");
-    puts("| JUGADOR                      |");
-    puts("+------------------------------+");
-    int hay_inventario = mostrar_objetos(jugador->inventario, 1);
-    if (!hay_inventario) puts("| (Inventario Vacio)           |");
-    printf("| Peso Total: %-16d |\n", jugador->peso_actual);
-    printf("| Puntaje Acumulado: %-9d |\n", jugador->puntaje);
-    printf("| Tiempo Restante: %-11d |\n", jugador->tiempo);
-    puts("+------------------------------+");
-    printf("\n");
-}
-
-void recoger_items(Jugador* jugador)
+int recoger_items(Jugador* jugador)
 {
     Escenario* esc = jugador->escenario_actual;
     if (list_first(esc->objetos) == NULL) 
     {
         printf("No hay objetos para recoger en este escenario.\n");
-        return;
+        return 0;
     }
 
     puts("\nObjetos disponibles para recoger:");
     mostrar_objetos(esc->objetos, 2);
 
-    printf("Ingrese el ID del objeto a recoger (0 para cancelar): ");
+    printf("\nIngrese el ID del objeto a recoger (0 para cancelar): ");
     int id_elegido;
-    scanf("%d", &id_elegido);
+    if (scanf("%d", &id_elegido) != 1)
+    {
+        puts("Error: Entrada no valida.");
+        return 0;
+    }
 
     if (id_elegido == 0) {
         puts("Accion cancelada.");
-        return;
+        return 0;
     }
 
     // Buscar el objeto por ID
@@ -385,39 +475,44 @@ void recoger_items(Jugador* jugador)
             jugador->tiempo -= 1;
             list_popCurrent(esc->objetos);
             printf("Has recogido: %s\n", obj->nombre);
-            printf("Tiempo Restante: %d - 1 = %d", jugador->tiempo + 1, jugador->tiempo);
+            printf("Tiempo Restante: %d - 1 = %d\n", jugador->tiempo + 1, jugador->tiempo);
 
             if (jugador->tiempo <= 0)
             {
-                puts("DERROTA - Se ha agotado el tiempo");
+                puts("\nDERROTA - Se ha agotado el tiempo");
                 jugador->terminado = 1;
             }
 
-            return;
+            return 1;
         }
     }
 
     puts("No existe un objeto con ese ID en este escenario.");
+    return 0;
 }
 
-void descartar_items(Jugador* jugador)
+int descartar_items(Jugador* jugador)
 {
     if (list_first(jugador->inventario) == NULL) 
     {
         printf("No tienes objetos en tu inventario para descartar.\n");
-        return;
+        return 0;
     }
 
     puts("\nObjetos en tu inventario:");
     mostrar_objetos(jugador->inventario, 2);
 
-    printf("Ingrese el ID del objeto a descartar (0 para cancelar): ");
+    printf("\nIngrese el ID del objeto a descartar (0 para cancelar): ");
     int id_elegido;
-    scanf("%d", &id_elegido);
+    if (scanf("%d", &id_elegido) != 1)
+    {
+        puts("Error: Entrada no valida.");
+        return 0;
+    }
 
     if (id_elegido == 0) {
         printf("Accion cancelada.\n");
-        return;
+        return 0;
     }
 
     // Buscar el objeto por ID
@@ -438,14 +533,15 @@ void descartar_items(Jugador* jugador)
                 jugador->terminado = 1;
             }
 
-            return;
+            return 1;
         }
     }
 
     printf("No existe un objeto con ese ID en tu inventario.\n");
+    return 0;
 }
 
-void avanzar(Jugador* jugador)
+int avanzar(Jugador* jugador)
 {
     Escenario* esc = jugador->escenario_actual;
     const char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
@@ -455,86 +551,98 @@ void avanzar(Jugador* jugador)
     printf("\nOpciones para Avanzar\n");
     int opciones[4];
     int count = 0;
-    for (int i = 0; i < 4; i++) {
-        if (conexiones[i]) {
+    for (int i = 0; i < 4; i++) 
+    {
+        if (conexiones[i]) 
+        {
             printf(" %d) %s (%s)\n", count + 1, dirs[i], conexiones[i]->nombre);
             opciones[count] = i;
             count++;
         }
     }
-    if (count == 0) {
+
+    if (count == 0) 
+    {
         printf("No hay caminos disponibles desde aquí.\n");
-        return;
+        return 0;
     }
 
-    printf("Elija una opcion (0 para cancelar): ");
+    printf("\nElija una opcion (0 para cancelar): ");
     int eleccion;
-    scanf("%d", &eleccion);
+    if (scanf("%d", &eleccion) != 1)
+    {
+        puts("Error: Entrada no valida.");
+        return 0;
+    }
 
-    if (eleccion <= 0 || eleccion > count) {
-        printf("Movimiento cancelado.\n");
-        return;
+    if (eleccion == 0) 
+    {
+        puts("Movimiento cancelado.");
+        return 0;
+    }
+    else if (eleccion < 0 && eleccion > count)
+    {
+        puts("Movimiento no existente");
+        return 0;
     }
 
     int dir_idx = opciones[eleccion - 1];
     Escenario* esc_inicial = jugador->escenario_actual;
     jugador->escenario_actual = conexiones[dir_idx];
-    printf("Te has movido de %s hacia %s.\n", esc_inicial->nombre, jugador->escenario_actual->nombre);
+    printf("\nTe has movido de %s hacia %s.\n", esc_inicial->nombre, jugador->escenario_actual->nombre);
 
     // Descontar tiempo: T = ((peso_actual + 1) / 10), mínimo 1
     int tiempo_usado = (jugador->peso_actual + 1) / 10;
     if (tiempo_usado < 1) tiempo_usado = 1;
     jugador->tiempo -= tiempo_usado;
-    printf("Tiempo consumido en el movimiento: %d\n", tiempo_usado);
-    printf("Tiempo restante: %d\n", jugador->tiempo);
+    printf("Tiempo Restante: %d - %d = %d\n", jugador->tiempo + tiempo_usado, tiempo_usado, jugador->tiempo);
 
     // Revisar si se acabó el tiempo
     int en_final = (jugador->escenario_actual->is_final && strcmp(jugador->escenario_actual->is_final, "Si") == 0);
     int sin_tiempo = (jugador->tiempo <= 0);
 
-    if (en_final && sin_tiempo) {
-        printf("\n¡Has llegado al escenario final justo cuando se agotó el tiempo!\n");
-        printf("Inventario final:\n");
-        for (Objeto* item = list_first(jugador->inventario); item != NULL; item = list_next(jugador->inventario))
-            printf("  #%02d - %s (Puntos: %d)\n", item->id, item->nombre, item->puntos);
-        printf("Puntaje final: %d\n", jugador->puntaje);
+    if (en_final) 
+    {
+        puts("\nFIN - Has llegado a la Salida");
         jugador->terminado = 1;
-        return;
+        jugador->llego_al_final = 1;
+        return 1;
     }
-    if (sin_tiempo) {
-        printf("\n¡Se ha agotado el tiempo! Has perdido.\n");
-        printf("Inventario final:\n");
-        for (Objeto* item = list_first(jugador->inventario); item != NULL; item = list_next(jugador->inventario))
-            printf("  #%02d - %s (Puntos: %d)\n", item->id, item->nombre, item->puntos);
-        printf("Puntaje final: %d\n", jugador->puntaje);
+    else if (sin_tiempo) 
+    {
+        puts("\nDERROTA - Se ha agotado el tiempo");
         jugador->terminado = 1;
-        return;
+        return 1;
     }
-    if (en_final) {
-        printf("\n¡Has llegado al escenario final!\n");
-        printf("Inventario final:\n");
-        for (Objeto* item = list_first(jugador->inventario); item != NULL; item = list_next(jugador->inventario))
-            printf("  #%02d - %s (Puntos: %d)\n", item->id, item->nombre, item->puntos);
-        printf("Puntaje final: %d\n", jugador->puntaje);
-        jugador->terminado = 1;
-        return;
-    }
+
+    return 1;
 }
 
-void reiniciar_partida(int jugadores, Jugador* player1, Jugador* player2, Map* escenarios)
+void reiniciar_partida(int jugadores, Jugador* player1, Jugador* player2, Map** escenarios)
 {
-    // Escenario inicial (primer escenario del mapa)
-    Escenario* inicial = (Escenario*) map_first(escenarios)->value;
+    // Limpiar inventarios de los jugadores
+    liberar_inventario(player1->inventario);
+    if (jugadores == 2 && player2 != NULL)
+        liberar_inventario(player2->inventario);
+
+    // Limpiar escenarios y recargar el laberinto desde cero
+    liberar_escenarios(*escenarios);
+    Map* nuevo_escenarios = map_create(is_equal_int);
+    cargar_lab(nuevo_escenarios);
 
     // Reinicializa inventario, puntaje, peso y tiempo usando la función existente
     iniciar_jugadores(jugadores, player1, player2);
 
     // Asigna el escenario inicial a ambos jugadores
-    player1->escenario_actual = inicial;
+    player1->escenario_actual = (Escenario*) map_first(nuevo_escenarios)->value;
     if (jugadores == 2 && player2 != NULL)
-        player2->escenario_actual = inicial;
+        player2->escenario_actual = (Escenario*) map_first(nuevo_escenarios)->value;
 
-    printf("La Partida se Reincio\n");
+    // Actualiza el puntero de escenarios
+    *escenarios = nuevo_escenarios;
+    free(nuevo_escenarios);
+
+    printf("La Partida se Reincio.\n");
 }
 
 void empezar_juego(Map* escenarios, int jugadores)
@@ -561,13 +669,6 @@ void empezar_juego(Map* escenarios, int jugadores)
     while(1)
     {
         Jugador* actual = (turno == 1) ? player1 : player2;
-        if (actual->terminado) 
-        {
-            printf("El Jugador %d ya terminó su partida.\n", turno);
-            if (jugadores == 2 && player1->terminado) turno = 2;
-            if (jugadores == 2 && player2->terminado) turno = 1;
-            continue;
-        }
 
         puts("========================================");
         if (jugadores == 1)
@@ -577,57 +678,70 @@ void empezar_juego(Map* escenarios, int jugadores)
         puts("========================================\n");
 
         mostrar_estado(actual);
+
         if (jugadores == 2) printf(">>> TURNO DE JUGADOR %d <<<\n\n", turno);
+
+        if (actual->terminado) 
+        {
+            if (jugadores == 2 && player1->terminado) turno = 2;
+            if (jugadores == 2 && player2->terminado) turno = 1;
+            continue;
+        }
+
         mostrar_menu(2);
 
         printf("Ingrese su opcion: ");
         scanf(" %c", &opcion);
 
+        int accion_consumida = 0;
+        int estaba_terminado = actual->terminado;
+
         switch (opcion)
         {
             case '1':
-                recoger_items(actual);
+                accion_consumida = recoger_items(actual);
                 break;
             case '2':
-                descartar_items(actual);
+                accion_consumida = descartar_items(actual);
                 break;
             case '3':
-                avanzar(actual);
+                accion_consumida = avanzar(actual);
                 break;
             case '4':
-                reiniciar_partida(jugadores, player1, player2, escenarios);
+                reiniciar_partida(jugadores, player1, player2, &escenarios);
                 break;
             case '5':
+                liberar_jugador(player1);
+                if (jugadores == 2) liberar_jugador(player2);
+                liberar_escenarios(escenarios);
+                escenarios = map_create(is_equal_int);
+                cargar_lab(escenarios);
                 return;
         }
 
-        if (jugadores == 2 && ((player1->terminado && !player2->terminado)
-            || (player2->terminado && !player1->terminado)))
+        if (jugadores == 2)
         {
-            mostrar_terminado(actual);
+            if (!estaba_terminado && actual->terminado && !(player1->terminado && player2->terminado))
+            {
+                mostrar_terminado(actual);
+            }
+
+            if (accion_consumida && !player1->terminado && !player2->terminado)
+            {
+                turno = (turno == 1) ? 2 : 1;
+            }
+
+            if (player1->terminado && player2->terminado)
+            {
+                limpiarPantalla();
+                mostrar_multijugador_terminado(player1, player2);
+                break;
+            }
         }
 
-        if (jugadores == 2 && !player1->terminado && !player2->terminado) turno = (turno == 1) ? 2 : 1;
-
-        if (jugadores == 2 && player1->terminado && player2->terminado) {
-            printf("\n=== ¡Ambos jugadores han terminado! ===\n");
-            printf("Inventario Jugador 1:\n");
-            for (Objeto* item = list_first(player1->inventario); item != NULL; item = list_next(player1->inventario))
-                printf("  #%02d - %s (Puntos: %d)\n", item->id, item->nombre, item->puntos);
-            printf("Puntaje Jugador 1: %d\n", player1->puntaje);
-
-            printf("\nInventario Jugador 2:\n");
-            for (Objeto* item = list_first(player2->inventario); item != NULL; item = list_next(player2->inventario))
-                printf("  #%02d - %s (Puntos: %d)\n", item->id, item->nombre, item->puntos);
-            printf("Puntaje Jugador 2: %d\n", player2->puntaje);
-
-            printf("\nPuntaje Total: %d\n", player1->puntaje + player2->puntaje);
-            break;
-        }
         presioneTeclaParaContinuar();
         limpiarPantalla();
     }
-    
 }
 
 int main()
@@ -660,6 +774,8 @@ int main()
         limpiarPantalla();
 
     } while (opcion != '4');
+
+    liberar_escenarios(mapa_escenarios);
 
   return 0;
 }
