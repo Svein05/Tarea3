@@ -4,15 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct
-{
-    void *key;
-    void *value;
+typedef struct {
+  void *key;
+  void *value;
 } MapPair;
 
 typedef struct Map Map;
 
-Map *map_create(int (*is_equal)(void *key1, void *key2), unsigned int (*hash_func)(void *key)); // hash map
+Map *map_create(int (*is_equal)(void *key1, void *key2)); // unsorted map
 
 Map *sorted_map_create(int (*lower_than)(void *key1, void *key2));
 

@@ -3,126 +3,84 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define HASH_MAP_CAPACITY 103 // Un número primo ayuda a dispersar las claves
-
-struct Map
-{
-    int (*is_equal)(void *key1, void *key2);
-    unsigned int (*hash_func)(void *key);
-    List *buckets[HASH_MAP_CAPACITY];
+struct Map {
+  int (*lower_than)(void *key1, void *key2);
+  int (*is_equal)(void *key1, void *key2);
+  List *ls;
 };
 
 typedef Map Map;
 
-Map *map_create(int (*is_equal)(void *key1, void *key2), unsigned int (*hash_func)(void *key))
-{
-    Map *newMap = (Map *)malloc(sizeof(Map));
-    newMap->is_equal = is_equal;
-    newMap->hash_func = hash_func;
+// Variable global para almacenar la función de comparación actual
+int (*current_lt)(void *, void *) = NULL;
 
-    for (int i = 0; i < HASH_MAP_CAPACITY; i++)
-    {
-        newMap->buckets[i] = list_create();
+int pair_lt(void *pair1, void *pair2) {
+  return (current_lt(((MapPair *)pair1)->key, ((MapPair *)pair2)->key));
+}
+
+Map *sorted_map_create(int (*lower_than)(void *key1, void *key2)) {
+  Map *newMap = (Map *)malloc(sizeof(Map));
+  newMap->lower_than = lower_than;
+  newMap->is_equal = NULL;
+  newMap->ls = list_create();
+
+  return newMap;
+}
+
+Map *map_create(int (*is_equal)(void *key1, void *key2)) {
+  Map *newMap = (Map *)malloc(sizeof(Map));
+  newMap->lower_than = NULL;
+  newMap->is_equal = is_equal;
+  newMap->ls = list_create();
+
+  return newMap;
+}
+
+
+void multimap_insert(Map *map, void *key, void *value) {
+  MapPair *pair = (MapPair *)malloc(sizeof(MapPair));
+  pair->key = key;
+  pair->value = value;
+
+  if (map->lower_than) {
+    current_lt = map->lower_than;
+    list_sortedInsert(map->ls, pair, pair_lt);
+  } else
+    list_pushBack(map->ls, pair);
+}
+
+void map_insert(Map *map, void *key, void *value) {
+  if (map_search(map, key) != NULL) return;
+  multimap_insert(map, key, value);
+}
+
+int _is_equal(Map *map, MapPair *pair, void *key) {
+  return ((map->is_equal && map->is_equal(pair->key, key)) ||
+          (map->lower_than && !map->lower_than(pair->key, key) &&
+           !map->lower_than(key, pair->key)));
+}
+
+MapPair *map_remove(Map *map, void *key) {
+  for (MapPair *pair = list_first(map->ls); pair != NULL;
+       pair = list_next(map->ls))
+    if (_is_equal(map, pair, key)) {
+      list_popCurrent(map->ls);
+      return pair;
     }
-
-    return newMap;
+  return NULL;
 }
 
-void map_insert(Map *map, void *key, void *value)
-{
-    unsigned int index = map->hash_func(key) % HASH_MAP_CAPACITY;
-
-    List *bucket = map->buckets[index];
-    for (MapPair *pair = list_first(bucket); pair != NULL; pair = list_next(bucket))
-    {
-        if (map->is_equal(pair->key, key))
-            return;
-    }
-
-    MapPair *newPair = (MapPair *)malloc(sizeof(MapPair));
-    newPair->key = key;
-    newPair->value = value;
-    list_pushBack(bucket, newPair);
+MapPair *map_search(Map *map, void *key) {
+  for (MapPair *pair = list_first(map->ls); pair != NULL;
+       pair = list_next(map->ls)) {
+    if (_is_equal(map, pair, key))
+      return pair;
+  }
+  return NULL;
 }
 
-void multimap_insert(Map *map, void *key, void *value)
-{
-    unsigned int index = map->hash_func(key) % HASH_MAP_CAPACITY;
+MapPair *map_first(Map *map) { return list_first(map->ls); }
 
-    List *bucket = map->buckets[index];
+MapPair *map_next(Map *map) { return list_next(map->ls); }
 
-    MapPair *newPair = (MapPair *)malloc(sizeof(MapPair));
-    newPair->key = key;
-    newPair->value = value;
-    list_pushBack(bucket, newPair);
-}
-
-MapPair *map_search(Map *map, void *key)
-{
-    unsigned int index = map->hash_func(key) % HASH_MAP_CAPACITY;
-    List *bucket = map->buckets[index];
-
-    for (MapPair *pair = list_first(bucket); pair != NULL; pair = list_next(bucket))
-    {
-        if (map->is_equal(pair->key, key))
-            return pair;
-    }
-    return NULL;
-}
-
-MapPair *map_remove(Map *map, void *key)
-{
-    unsigned int index = map->hash_func(key) % HASH_MAP_CAPACITY;
-    List *bucket = map->buckets[index];
-
-    for (MapPair *pair = list_first(bucket); pair != NULL; pair = list_next(bucket))
-    {
-        if (map->is_equal(pair->key, key))
-        {
-            list_popCurrent(bucket);
-            return pair;
-        }
-    }
-    return NULL;
-}
-
-void map_clean(Map *map)
-{
-    for (int i = 0; i < HASH_MAP_CAPACITY; i++)
-    {
-        list_clean(map->buckets[i]);
-    }
-}
-
-// Iterador global (solo permite recorrer todo el mapa completo)
-static int current_bucket = 0;
-
-MapPair *map_first(Map *map)
-{
-    current_bucket = 0;
-    while (current_bucket < HASH_MAP_CAPACITY)
-    {
-        MapPair *pair = list_first(map->buckets[current_bucket]);
-        if (pair != NULL)
-            return pair;
-        current_bucket++;
-    }
-    return NULL;
-}
-
-MapPair *map_next(Map *map)
-{
-    MapPair *pair = list_next(map->buckets[current_bucket]);
-    if (pair != NULL)
-        return pair;
-
-    current_bucket++;
-    while (current_bucket < HASH_MAP_CAPACITY)
-    {
-        pair = list_first(map->buckets[current_bucket]);
-        if (pair != NULL)
-            return pair;
-        current_bucket++;
-    }
-    return NULL;
-}
+void map_clean(Map *map) { list_clean(map->ls); }
