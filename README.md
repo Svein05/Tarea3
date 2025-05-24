@@ -356,20 +356,15 @@ Para reinciar partida, el jugador debe seleccionar la **opcion 4** en el menú d
 5) Salir del Juego
 ========================================
 Ingrese su opcion: 4
-¿Estás seguro que deseas reiniciar la partida?
-Todo tu progreso se perderá.
- 1) Sí
- 2) No
-Seleccione una opción: 1
-
-La partida ha sido reiniciada correctamente.
-Has vuelto al escenario inicial.
+Volviendo a cargar el Laberinto...
+Laberinto cargado exitosamente.     
+La Partida se Reincio.
 Presione una tecla para continuar...
 ```
 > Al confirmar la opción, el juego reinicia todo el estado del jugador, incluyendo el inventario, puntaje acumulado, tiempo restante y ubicación. Esta función es útil si el jugador queda atascado o desea empezar desde cero para mejorar su desempeño.
 
 #### 🏠 Salir del Juego.
-Para salir del juego, el jugador deberá seleccionar la **opción 5** en el menú. Esta acción permite salir de la partida actual y regresar al menú inicial del programa, sin cerrar el juego por completo.
+Para cerrar completamente la aplicación, el jugador debe seleccionar la **opción 5** en el menú principal. Esta acción finaliza la ejecución del programa y cierra el sistema de forma definitiva.
 ```
 ========================================
          GraphQuest: Un Jugador
@@ -413,9 +408,9 @@ Para salir del juego, el jugador deberá seleccionar la **opción 5** en el men�
 Ingrese su opcion: 5
 Presione una tecla para continuar...
 ```
-> Al seleccionar esta opción, el jugador regresará al menú principal del juego, donde podrá iniciar una nueva partida (en modo solitario o multijugador) o salir del programa. Esta función permite cambiar el modo de juego sin reiniciar la aplicación.
+> Se recomienda asegurarse de haber finalizado cualquier partida antes de salir, ya que esta acción cerrará por completo el juego.
 
-#### 🏁 Si el jugador llega al final.
+#### 🏁 Si el jugador llega al final del laberinto.
 Por un lado si el jugador alcanza con éxito la salida del laberinto, se mostrará el siguiente mensaje:
 ```
 FIN - Has llegado a la Salida
