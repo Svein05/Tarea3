@@ -38,7 +38,11 @@ Este programa fue desarrollado integramente en el lenguaje de **Programacion C**
 - Cargar laberinto mediante un archivo **CSV**.
 - Iniciar partida en modo **Solitario**.
 - Iniciar partida en modo **Multijugador**.
-
+- **Recoleccion** de ítems.
+- **Descartar** Ítems.
+- **Avanzar** al siguiente escenario.
+- **Reiniciar** Partida.
+- **Salir** del juego.
 
 > #### ⚠️ Problemas Conocidos
 > 
@@ -52,7 +56,6 @@ Este programa fue desarrollado integramente en el lenguaje de **Programacion C**
 | 1) Cargar Laberinto                  |
 | 2) Iniciar Partida: Solitario        |
 | 3) Iniciar Partida: Multijugador     |
-| 4) Salir del Juego                   |
 +--------------------------------------+
 ```
 ### 👾 Procedicimiento de Ejemplo:
@@ -65,7 +68,6 @@ Antes de comenzar a jugar **GraphQuest**, es fundamental seleccionar la **opció
 | 1) Cargar Laberinto                  |
 | 2) Iniciar Partida: Solitario        |
 | 3) Iniciar Partida: Multijugador     |
-| 4) Salir del Juego                   |
 +--------------------------------------+
 Ingrese su opcion: 1
 Laberinto cargado exitosamente.
@@ -84,7 +86,6 @@ Para comenzar una partida en **modo solitario**, el usuario debe seleccionar la 
 | 1) Cargar Laberinto                  |
 | 2) Iniciar Partida: Solitario        |
 | 3) Iniciar Partida: Multijugador     |
-| 4) Salir del Juego                   |
 +--------------------------------------+
 Ingrese su opcion: 2
 ```
@@ -126,7 +127,7 @@ Ingrese su opcion: 2
 2) Descartar Item(s)
 3) Avanzar
 4) Reiniciar Partida
-5) Volver al Menu Principal
+5) Salir del Juego
 ========================================
 Ingrese su opcion: _
 ```
@@ -177,7 +178,7 @@ Para recoger ítems, el jugador debe seleccionar la **opción 1** desde el menú
 2) Descartar Item(s)
 3) Avanzar
 4) Reiniciar Partida
-5) Volver al Menu Principal
+5) Salir del Juego
 ========================================
 Ingrese su opcion: 1
 
@@ -235,7 +236,7 @@ Para descartar ítems, el jugador deberá seleccionar la opcion 2 desde el menú
 2) Descartar Item(s)
 3) Avanzar
 4) Reiniciar Partida
-5) Volver al Menu Principal
+5) Salir del Juego
 ========================================
 Ingrese su opcion: 2
 
@@ -292,7 +293,7 @@ Para avanzar, el jugador debe seleccionar la **opción 3** desde el menú de jue
 2) Descartar Item(s)
 3) Avanzar
 4) Reiniciar Partida
-5) Volver al Menu Principal
+5) Salir del Juego
 ========================================
 Ingrese su opcion: 3
 
@@ -352,7 +353,7 @@ Para reinciar partida, el jugador debe seleccionar la **opcion 4** en el menú d
 2) Descartar Item(s)
 3) Avanzar
 4) Reiniciar Partida
-5) Volver al Menu Principal
+5) Salir del Juego
 ========================================
 Ingrese su opcion: 4
 ¿Estás seguro que deseas reiniciar la partida?
@@ -367,8 +368,8 @@ Presione una tecla para continuar...
 ```
 > Al confirmar la opción, el juego reinicia todo el estado del jugador, incluyendo el inventario, puntaje acumulado, tiempo restante y ubicación. Esta función es útil si el jugador queda atascado o desea empezar desde cero para mejorar su desempeño.
 
-#### 🏠 Volver al Menú Principal.
-Para volver al menú principal, el jugador deberá seleccionar la **opción 5** en el menú del juego. Esta acción permite salir de la partida actual y regresar al menú inicial del programa, sin cerrar el juego por completo.
+#### 🏠 Salir del Juego.
+Para salir del juego, el jugador deberá seleccionar la **opción 5** en el menú. Esta acción permite salir de la partida actual y regresar al menú inicial del programa, sin cerrar el juego por completo.
 ```
 ========================================
          GraphQuest: Un Jugador
@@ -407,7 +408,7 @@ Para volver al menú principal, el jugador deberá seleccionar la **opción 5** 
 2) Descartar Item(s)
 3) Avanzar
 4) Reiniciar Partida
-5) Volver al Menu Principal
+5) Salir del Juego
 ========================================
 Ingrese su opcion: 5
 Presione una tecla para continuar...
@@ -415,11 +416,30 @@ Presione una tecla para continuar...
 > Al seleccionar esta opción, el jugador regresará al menú principal del juego, donde podrá iniciar una nueva partida (en modo solitario o multijugador) o salir del programa. Esta función permite cambiar el modo de juego sin reiniciar la aplicación.
 
 #### 🏁 Si el jugador llega al final.
-si el jugador llega a la salida se mostrará el siguiente mensaje
+Por un lado si el jugador alcanza con éxito la salida del laberinto, se mostrará el siguiente mensaje:
 ```
+FIN - Has llegado a la Salida
+Inventario final:
+  #08 - Moneda (Peso: 1, Puntos: 2)
+  #12 - Rubi (Peso: 5, Puntos: 20)
+  #13 - Mapa (Peso: 1, Puntos: 10)
+Puntaje final: 32
+Presione una tecla para continuar...
+```
+> ¡Felicidades! Ahora puedes planear una mejor estrategia para superar tu puntaje en la próxima partida.
 
+En caso contrario, si no se llega al final del laberinto, se mostrará un mensaje de derrota:
 ```
-#### 👥 Modo Multijugador
+DERROTA - Se ha agotado el tiempo
+Inventario final:
+  #08 - Moneda (Peso: 1, Puntos: 2)
+  #12 - Rubi (Peso: 5, Puntos: 20)
+  #13 - Mapa (Peso: 1, Puntos: 10)
+Puntaje final: 32
+Presione una tecla para continuar...
+```
+> El tiempo ha terminado. ¡Inténtalo de nuevo utilizando una estrategia más eficiente!
+#### 👥 Modo Multijugador.
 para el modo multijugador se deberá seleccionar desde el menú principal la opcion 3
 ```
 +--------------------------------------+
@@ -428,43 +448,11 @@ para el modo multijugador se deberá seleccionar desde el menú principal la opc
 | 1) Cargar Laberinto                  |
 | 2) Iniciar Partida: Solitario        |
 | 3) Iniciar Partida: Multijugador     |
-| 4) Salir del Juego                   |
 +--------------------------------------+
 Ingrese su opcion: 3
 ```
+el juego es por turnos de jugador 1 y jugador 2
 ```
-========================================
-         GraphQuest: Multijugador       
-========================================
-
-+------------------------------+        
-| ESCENARIO                    |        
-+------------------------------+        
-| Entrada principal            |
-|                              |
-| Una puerta rechinante abre   |
-| paso a esta mansion olvidada |
-| por los dioses y los         |
-| conserjes. El aire huele a   |
-| humedad y a misterios sin    |
-| resolver.                    |
-|                              |
-| Acciones Posibles:           |
-| - ABAJO                      |
-|                              |
-| Objetos Disponibles:         |
-| - (Sin Items Disponibles)    |
-+------------------------------+
-
-+------------------------------+
-| JUGADOR                      |
-+------------------------------+
-| (Inventario Vacio)           |
-| Peso Total: 0                |
-| Puntaje Acumulado: 0         |
-| Tiempo Restante: 10          |
-+------------------------------+
-
 >>> TURNO DE JUGADOR 1 <<<
 
 ========================================
@@ -476,6 +464,21 @@ Ingrese su opcion: 3
 ========================================
 Ingrese su opcion: _
 ```
+cada jugador tiene su propio inventario, items, peso, tiempo, camino.
+```
+>>> TURNO DE JUGADOR 2 <<<
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: _
+```
+alfinal de la partida se mostrará quien fue el ganador.
+
 ## Contribuciones
 
 ### Elias Manriquez

@@ -9,6 +9,7 @@
 
 #define LINE_WIDTH 28
 
+// Se crea el struct Objeto
 typedef struct
 {
     char *nombre;
@@ -17,6 +18,7 @@ typedef struct
     int id;
 } Objeto;
 
+// Se crea el struct Escenario
 typedef struct Escenario Escenario;
 struct Escenario
 {
@@ -31,6 +33,7 @@ struct Escenario
     char* is_final;
 };
 
+// Se crea el struct Jugador
 typedef struct
 {
     Escenario *escenario_actual;
@@ -55,13 +58,19 @@ int is_equal_int(void *key1, void *key2)
     return *(int *)key1 == *(int *)key2; // Compara valores enteros directamente
 }
 
+// Funcion para poder imprimir de manera que este acorde con los limites
+// y se vea uniforme con el programa
 void imprimir_con_formato(const char *texto) 
 {
+    // Tomamo el largo de la cadena
     int len = strlen(texto);
     int i = 0;
 
+    // Hacemos un bucle hasta que la variable alcance al largo de la cadena
     while (i < len) 
     {
+        // Usamos LINE_WIDTH como el ancho que tendra el texto
+        // Indicado por el cuadro y sus limites
         int j = i + LINE_WIDTH;
 
         // Si el texto restante es menor al ancho, imprime y termina
@@ -71,15 +80,14 @@ void imprimir_con_formato(const char *texto)
             break;
         }
 
-        // Busca el último espacio antes de pasar el límite
+        // Busca el ultimo espacio antes de pasar el limite
         int espacio = j;
-        while (espacio > i && texto[espacio] != ' ')
-            espacio--;
+        while (espacio > i && texto[espacio] != ' ') espacio--;
 
-        // Si no hay espacio (una palabra muy larga), corta al límite
+        // Si no hay espacio se corta al limite
         if (espacio == i) espacio = j;
 
-        // Imprime la línea
+        // Se imprime la linea
         char buffer[LINE_WIDTH + 1];
         strncpy(buffer, texto + i, espacio - i);
         buffer[espacio - i] = '\0';
@@ -91,8 +99,11 @@ void imprimir_con_formato(const char *texto)
     }
 }
 
+// Funcion para mostrar los diferentes menus,
+// esto para la eficiencia del codigo
 void mostrar_menu(int menu)
 {
+    // Menu principal
     if (menu == 1)
     {
         puts("+--------------------------------------+");
@@ -101,9 +112,9 @@ void mostrar_menu(int menu)
         puts("| 1) Cargar Laberinto                  |");
         puts("| 2) Iniciar Partida: Solitario        |");
         puts("| 3) Iniciar Partida: Multijugador     |");
-        puts("| 4) Salir del Juego                   |");
         puts("+--------------------------------------+");
     }
+    // Menu para el Juego
     else if (menu == 2)
     {
         puts("========================================");
@@ -111,26 +122,30 @@ void mostrar_menu(int menu)
         puts("2) Descartar Item(s)");
         puts("3) Avanzar");
         puts("4) Reiniciar Partida");
-        puts("5) Volver al Menu Principal");
+        puts("5) Salir del Juego");
         puts("========================================");
     }
 }
 
+// Funcion para mostrar los objetos de una lista,
+// util para no repetir codigo
 int mostrar_objetos(List* items, int tipo)
 {
+    // Menu tipo 1 para mostrar los items
     if (tipo == 1)
     {
         int hay_inventario = 0;
         for (Objeto* item = list_first(items) ; item != NULL ; item = list_next(items))
         {
-            printf("| - #%02d / %-20s |\n", item->id, item->nombre);
-            printf("|   Peso: %-2d  /  Puntos: %-2d    |\n", item->peso, item->puntos);
+            printf("| -> #%02d / %-19s |\n", item->id, item->nombre);
+            printf("|    Peso: %-2d  ,  Puntos: %-2d   |\n", item->peso, item->puntos);
             puts("|                              |");
             hay_inventario = 1;
         }
 
         return hay_inventario;
     }
+    // Menu tipo 2 para mostrar los items
     else if (tipo == 2)
     {
         for (Objeto* obj = list_first(items); obj != NULL; obj = list_next(items))
@@ -138,6 +153,8 @@ int mostrar_objetos(List* items, int tipo)
     }
 }
 
+// Funcion para mostrar la informacion final del jugador
+// al acabarse su tiempo o finalice el juego (solitario)
 void mostrar_terminado(Jugador* player)
 {
     puts("Inventario final:");
@@ -145,10 +162,16 @@ void mostrar_terminado(Jugador* player)
     printf("Puntaje final: %d\n", player->puntaje);
 }
 
+// Funcion para mostrar el estado de el jugador 
+// o jugadores, dependiendo el tipo de juego.
 void mostrar_estado(Jugador* jugador)
 {
+    // Tomamos el escenario actual del jugador
     Escenario* escenario_actual = jugador->escenario_actual;
 
+    // Atravez de un formato especifico del programa
+    // Imprimos el escenario, usando la funcion de
+    // imprimir_con_formato() para la descripcion
     puts("+------------------------------+");
     puts("| ESCENARIO                    |");
     puts("+------------------------------+");
@@ -158,13 +181,16 @@ void mostrar_estado(Jugador* jugador)
     puts("|                              |");
     puts("| Acciones Posibles:           |");
 
-    const char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
+    // Creamos un arrelgo para las direcciones.
+    char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
     Escenario* conexiones[] = {
         escenario_actual->arriba,
         escenario_actual->abajo,
         escenario_actual->izquierda,
         escenario_actual->derecha
     };
+
+    // Contador para saber si hay o no direcciones disponibles
     int hay_direccion = 0;
     for (int i = 0; i < 4; i++) 
     {
@@ -174,14 +200,18 @@ void mostrar_estado(Jugador* jugador)
             hay_direccion = 1;
         }
     }
+    // Verificamos que las haya
     if (!hay_direccion) puts("| - (Ninguna)                  |\n");
 
+    // e imprimimos la informacion completa del escenario
     puts("|                              |");
     puts("| Objetos Disponibles:         |");
     int hay_objetos = mostrar_objetos(escenario_actual->objetos, 1);
     if (hay_objetos == 0) puts("| - (Sin Items Disponibles)    |");
     puts("+------------------------------+");
 
+    // Ahora se imprime la informaciond del jugador
+    // Con sus objetos, su peso total, su puntaje acumulado y su tiempo restante
     puts("\n+------------------------------+");
     puts("| JUGADOR                      |");
     puts("+------------------------------+");
@@ -194,17 +224,22 @@ void mostrar_estado(Jugador* jugador)
     printf("\n");
 }
 
+// Funcion para mostrar el menu FINAL cuando se juega de manera
+// multijugador, obteniendo un resumen completo de ambos jugadores
 void mostrar_multijugador_terminado(Jugador* player1, Jugador* player2)
 {
+    // Obtenemos sus puntajes y si es que llegaron al final o no.
     int puntaje1 = player1->puntaje;
     int puntaje2 = player2->puntaje;
     int llego1 = player1->llego_al_final;
     int llego2 = player2->llego_al_final;
 
+    // Titulo principal
     puts("+------------------------------+");
     puts("|    EL JUEGO HA FINALIZADO    |");
     puts("+------------------------------+");
 
+    // Informacion del Jugador 1
     puts("\n+------------------------------+");
     puts("| JUGADOR 1                    |");
     puts("+------------------------------+");
@@ -214,6 +249,7 @@ void mostrar_multijugador_terminado(Jugador* player1, Jugador* player2)
     printf("| Llego al Final? %s\n", (llego1 == 1) ? "SI" : "NO");
     puts("+------------------------------+\n");
 
+    // Informacion del Jugador 2
     puts("+------------------------------+");
     puts("| JUGADOR 2                    |");
     puts("+------------------------------+");
@@ -223,72 +259,91 @@ void mostrar_multijugador_terminado(Jugador* player1, Jugador* player2)
     printf("| Llego al Final? %s\n", (llego2 == 1) ? "SI" : "NO");
     puts("+------------------------------+\n");
 
+    // Aqui atravez de diferentes condiciones, podemos
+    // identificar el ganador de el juego o si hubo empate.
     puts("+------------------------------+");
     if (llego1 && !llego2)
-        printf("|   EL JUGADOR 1 HA GANADO!    |\n");
+        printf("|    EL JUGADOR 1 HA GANADO    |\n");
     else if (!llego1 && llego2)
-        printf("|   EL JUGADOR 2 HA GANADO!    |\n");
+        printf("|    EL JUGADOR 2 HA GANADO    |\n");
     else if (!llego1 && !llego2)
-        printf("|   NADIE GANO (NINGUNO LLEGO) |\n");
+        printf("|  NADIE GANO (NINGUNO LLEGO)  |\n");
     else if (puntaje1 > puntaje2)
-        printf("|   EL JUGADOR 1 HA GANADO!    |\n");
+        printf("|    EL JUGADOR 1 HA GANADO    |\n");
     else if (puntaje2 > puntaje1)
-        printf("|   EL JUGADOR 2 HA GANADO!    |\n");
+        printf("|    EL JUGADOR 2 HA GANADO    |\n");
     else
-        printf("|        EMPATE EN PUNTOS      |\n");
+        printf("|       EMPATE EN PUNTOS       |\n");
     puts("+------------------------------+");
 }
 
+// Funcion para inicializar a los jugadores
 void iniciar_jugadores(int cantidad, Jugador* player1, Jugador* player2)
 {
+    // Siempre se inicializara al Jugador 1
     player1->inventario = list_create();
     player1->peso_actual = 0;
     player1->puntaje = 0;
-    player1->tiempo = 4;
+    player1->tiempo = 15;
     player1->escenario_actual = NULL;
     player1->terminado = 0;
     player1->llego_al_final = 0;
 
+    // Si y solo si, hay un jugador 2, este se inicializara
     if (cantidad == 2 && player2 != NULL)
     {
         player2->inventario = list_create();
         player2->peso_actual = 0;
         player2->puntaje = 0;
-        player2->tiempo = 2;
+        player2->tiempo = 15;
         player2->escenario_actual = NULL;
         player2->terminado = 0;
         player2->llego_al_final = 0;
     }
 }
 
-void liberar_inventario(List* inventario) {
+// Funcion para liberar la memoria de los inventarios de los jugadores
+void liberar_inventario(List* inventario) 
+{
     if (!inventario) return;
     list_clean(inventario);
     free(inventario);
 }
 
-void liberar_jugador(Jugador* jugador) {
+// Funcion para liberar la memoria de los jugadoes
+void liberar_jugador(Jugador* jugador) 
+{
     if (!jugador) return;
     liberar_inventario(jugador->inventario);
     free(jugador);
 }
 
-void liberar_objetos(List* lista) {
+// Funcion para liberar la memoria de los objetos
+// del escenario
+void liberar_objetos(List* lista) 
+{
     if (!lista) return;
     Objeto* obj = list_first(lista);
-    while (obj) {
+
+    while (obj) 
+    {
         free(obj->nombre);
         free(obj);
         obj = list_next(lista);
     }
+    
     list_clean(lista);
     free(lista);
 }
 
-void liberar_escenarios(Map* escenarios) {
+// Funcion para liberar la memoria de los escenarios, por completo
+void liberar_escenarios(Map* escenarios) 
+{
     if (!escenarios) return;
     MapPair* par = map_first(escenarios);
-    while (par) {
+
+    while (par) 
+    {
         Escenario* esc = (Escenario*)par->value;
         free(esc->nombre);
         free(esc->descripcion);
@@ -297,6 +352,7 @@ void liberar_escenarios(Map* escenarios) {
         free(esc);
         par = map_next(escenarios);
     }
+
     map_clean(escenarios);
     free(escenarios);
 }
@@ -580,7 +636,7 @@ int avanzar(Jugador* jugador)
         puts("Movimiento cancelado.");
         return 0;
     }
-    else if (eleccion < 0 && eleccion > count)
+    else if (eleccion < 0 || eleccion > count)
     {
         puts("Movimiento no existente");
         return 0;
@@ -627,27 +683,23 @@ void reiniciar_partida(int jugadores, Jugador* player1, Jugador* player2, Map** 
 
     // Limpiar escenarios y recargar el laberinto desde cero
     liberar_escenarios(*escenarios);
-    Map* nuevo_escenarios = map_create(is_equal_int);
-    cargar_lab(nuevo_escenarios);
+    *escenarios = map_create(is_equal_int);
+    cargar_lab(*escenarios);
 
     // Reinicializa inventario, puntaje, peso y tiempo usando la función existente
     iniciar_jugadores(jugadores, player1, player2);
 
     // Asigna el escenario inicial a ambos jugadores
-    player1->escenario_actual = (Escenario*) map_first(nuevo_escenarios)->value;
+    player1->escenario_actual = (Escenario*) map_first(*escenarios)->value;
     if (jugadores == 2 && player2 != NULL)
-        player2->escenario_actual = (Escenario*) map_first(nuevo_escenarios)->value;
-
-    // Actualiza el puntero de escenarios
-    *escenarios = nuevo_escenarios;
-    free(nuevo_escenarios);
+        player2->escenario_actual = (Escenario*) map_first(*escenarios)->value;
 
     printf("La Partida se Reincio.\n");
 }
 
-void empezar_juego(Map* escenarios, int jugadores)
+void empezar_juego(Map** escenarios, int jugadores)
 {
-    if (map_first(escenarios) == NULL) 
+    if (map_first(*escenarios) == NULL) 
     {
         puts("No se ha cargado el Juego (Opcion 1)");
         return;
@@ -660,8 +712,8 @@ void empezar_juego(Map* escenarios, int jugadores)
 
     iniciar_jugadores(jugadores, player1, player2);
 
-    player1->escenario_actual = (Escenario*) map_first(escenarios)->value;
-    if (jugadores == 2) player2->escenario_actual = (Escenario*) map_first(escenarios)->value;
+    player1->escenario_actual = (Escenario*) map_first(*escenarios)->value;
+    if (jugadores == 2) player2->escenario_actual = (Escenario*) map_first(*escenarios)->value;
 
     int turno = 1;
     char opcion;
@@ -708,15 +760,25 @@ void empezar_juego(Map* escenarios, int jugadores)
                 accion_consumida = avanzar(actual);
                 break;
             case '4':
-                reiniciar_partida(jugadores, player1, player2, &escenarios);
+                reiniciar_partida(jugadores, player1, player2, escenarios);
                 break;
             case '5':
                 liberar_jugador(player1);
                 if (jugadores == 2) liberar_jugador(player2);
-                liberar_escenarios(escenarios);
-                escenarios = map_create(is_equal_int);
-                cargar_lab(escenarios);
+                liberar_escenarios(*escenarios);
+                exit(0);
                 return;
+        }
+
+        if (jugadores == 1 && actual->terminado) 
+        {
+            mostrar_terminado(actual);
+            liberar_jugador(player1);
+            liberar_escenarios(*escenarios);
+            *escenarios = map_create(is_equal_int);
+            printf("Se reiniciara el Laberinto...\n");
+            cargar_lab(*escenarios);
+            break;
         }
 
         if (jugadores == 2)
@@ -735,6 +797,12 @@ void empezar_juego(Map* escenarios, int jugadores)
             {
                 limpiarPantalla();
                 mostrar_multijugador_terminado(player1, player2);
+                liberar_jugador(player1);
+                liberar_jugador(player2);
+                liberar_escenarios(*escenarios);
+                *escenarios = map_create(is_equal_int);
+                printf("Se reiniciara el Laberinto...\n");
+                cargar_lab(*escenarios);
                 break;
             }
         }
@@ -747,11 +815,11 @@ void empezar_juego(Map* escenarios, int jugadores)
 int main()
 {
     char opcion;
-
-    Map* mapa_escenarios = map_create(is_equal_int);
     limpiarPantalla();
 
-    do 
+    Map* mapa_escenarios = map_create(is_equal_int);
+
+    while(1)
     {
         mostrar_menu(1);
     
@@ -764,16 +832,16 @@ int main()
                 cargar_lab(mapa_escenarios);
                 break;
             case '2':
-                empezar_juego(mapa_escenarios, 1);
+                empezar_juego(&mapa_escenarios, 1);
                 break;
             case '3':
-                empezar_juego(mapa_escenarios, 2);
+                empezar_juego(&mapa_escenarios, 2);
                 break;
         }
         presioneTeclaParaContinuar();
         limpiarPantalla();
 
-    } while (opcion != '4');
+    }
 
     liberar_escenarios(mapa_escenarios);
 
