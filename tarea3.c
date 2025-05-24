@@ -47,7 +47,7 @@ typedef struct
 
 /**
     Compara dos claves de tipo entero para determinar si son iguales.
-    Esta función se utiliza para inicializar mapas con claves de tipo entero.
+    Esta funcion se utiliza para inicializar mapas con claves de tipo entero.
 
     @param key1 Primer puntero a la clave entera.
     @param key2 Segundo puntero a la clave entera.
@@ -331,7 +331,7 @@ void liberar_objetos(List* lista)
         free(obj);
         obj = list_next(lista);
     }
-    
+
     list_clean(lista);
     free(lista);
 }
@@ -357,23 +357,18 @@ void liberar_escenarios(Map* escenarios)
     free(escenarios);
 }
 
-Map* map_copia_superficial(Map* original, int (*is_equal)(void*, void*)) {
-    Map* copia = map_create(is_equal);
-    for (MapPair* par = map_first(original); par != NULL; par = map_next(original)) {
-        // Solo copia los punteros, no duplica la memoria de los datos
-        map_insert(copia, par->key, par->value);
-    }
-    return copia;
-}
-
+// Funcion para conectar los escenarios (nodos) entre si, con sus direcciones
 void conectar_escenario(Map* escenarios, Escenario* esc, int* id, Escenario** direccion)
 {
-    if (id && *id != -1) {
+    if (id && *id != -1) 
+    {
         MapPair* par_dest = map_search(escenarios, id);
         *direccion = par_dest ? (Escenario*)par_dest->value : NULL;
     }
 }
 
+// Funcion para cargar el laberinto por completo
+// atravez de un CSV, recibe un mapa.
 void cargar_lab(Map* escenarios)
 {
     if (map_first(escenarios) != NULL)
@@ -382,6 +377,7 @@ void cargar_lab(Map* escenarios)
         return;
     }
 
+    // Abrimos el archivo del csv
     FILE *archivo = fopen("data/graphquest.csv", "r");
     if (archivo == NULL) 
     {
@@ -389,14 +385,21 @@ void cargar_lab(Map* escenarios)
         return;
     }
 
+    // Leemos los encabezados
     leer_linea_csv(archivo, ',');
 
+    // Creamos un mapa para las conexiones
     Map* conexiones_ids = map_create(is_equal_int);
-    int id_objeto = 1; // Contador global de IDs de objetos
 
+    // Contador global de IDs de objetos
+    // para su facil manipuacion
+    int id_objeto = 1;
+
+    // Bucle para leer el CSV
     char **campos;
     while ((campos = leer_linea_csv(archivo, ',')) != NULL) 
     {
+        // Inicilizamos el escenario
         Escenario* escenario = (Escenario*) malloc(sizeof(Escenario));
         escenario->id = atoi(campos[0]);
         escenario->nombre = strdup(campos[1]);
@@ -408,29 +411,35 @@ void cargar_lab(Map* escenarios)
         escenario->derecha = NULL;
         escenario->is_final = strdup(campos[8]);
 
-        // Cargar objetos
+        // Cargar objetos mediante un ciclo for
         List* items = split_string(campos[3], ";");
         for (char *item = list_first(items); item != NULL; item = list_next(items))
         {
+            // Separamos la cadena
             List* values = split_string(item, ",");
             if (list_size(values) < 3) continue;
 
+            // Creamos punteros a objetos
             Objeto* obj = (Objeto*) malloc(sizeof(Objeto));
-
             char* val0 = list_first(values);
             char* val1 = list_next(values);
             char* val2 = list_next(values);
 
+            // Declaramos la informacion del objeto
+            // Atravez del struct
             obj->nombre = strdup(val0);
             obj->puntos = atoi(val1);
             obj->peso = atoi(val2);
             obj->id = id_objeto++;
 
+            // Insertamos en la lista de objetos del escenario
             list_pushBack(escenario->objetos, obj);
 
+            // Limpiamos las cadenas que separamos antes
             list_clean(values);
             free(values);
         }
+        // Y limpiamos los items de antes
         list_clean(items);
         free(items);
 
@@ -441,62 +450,72 @@ void cargar_lab(Map* escenarios)
         int *izq = (int*)malloc(sizeof(int)); *izq = atoi(campos[6]);
         int *der = (int*)malloc(sizeof(int)); *der = atoi(campos[7]);
 
+        // Insertamos en orden las conexiones
         list_pushBack(ids, arriba);
         list_pushBack(ids, abajo);
         list_pushBack(ids, izq);
         list_pushBack(ids, der);
 
+        // Creamos un puntero a int
         int *id_clave = (int*)malloc(sizeof(int));
         *id_clave = escenario->id;
 
+        // Insertamos en ambos mapas
         map_insert(escenarios, id_clave, escenario);
         map_insert(conexiones_ids, id_clave, ids);
     }
 
+    // Cerramos el Archivo
     fclose(archivo);
 
-    // Crear copia superficial de conexiones_ids
-    Map* conexiones_ids_copia = map_copia_superficial(conexiones_ids, is_equal_int);
-
-    MapPair* par_con = map_first(conexiones_ids_copia);
+    // Iteramos sobre las conexiones de IDS
+    MapPair* par_con = map_first(conexiones_ids);
     while (par_con) 
     {
+        // Tomamos la id del mapa y la lista de mapas
+        // que deben estar conectado a ese mapa
         int* id_clave = par_con->key;
         List* ids = (List*)par_con->value;
 
-        // Busca el escenario original
+        // Buscamos en el mapa original ese mapa anterior
         MapPair* par_esc = map_search(escenarios, id_clave);
         if (!par_esc) 
         {
-            par_con = map_next(conexiones_ids_copia);
+            par_con = map_next(conexiones_ids);
             continue;
         }
 
+        // Tomamos el escenario
         Escenario* esc = (Escenario*)par_esc->value;
 
+        // de la lista anterior, tomamos las conexiones
         int* id_arriba = list_first(ids);
         int* id_abajo = list_next(ids);
         int* id_izquierda = list_next(ids);
         int* id_derecha = list_next(ids);
 
+        // Y finalmente los conectamos
         conectar_escenario(escenarios, esc, id_arriba, &esc->arriba);
         conectar_escenario(escenarios, esc, id_abajo, &esc->abajo);
         conectar_escenario(escenarios, esc, id_izquierda, &esc->izquierda);
         conectar_escenario(escenarios, esc, id_derecha, &esc->derecha);
 
-        par_con = map_next(conexiones_ids_copia);
+        par_con = map_next(conexiones_ids);
     }
 
-    map_clean(conexiones_ids_copia);
-    free(conexiones_ids_copia);
+    /// Liberamos el mapa de conexiones, ya que ahora no sera util
     map_clean(conexiones_ids);
     free(conexiones_ids);
 
+    // Mensaje de confirmacion
     puts("Laberinto cargado exitosamente.");
 }
 
+// Funcion para recoger items del escenario
+// donde se encuentra el jugador.
 int recoger_items(Jugador* jugador)
 {
+    // Verificamos que en el escenario hay objetos
     Escenario* esc = jugador->escenario_actual;
     if (list_first(esc->objetos) == NULL) 
     {
@@ -504,9 +523,12 @@ int recoger_items(Jugador* jugador)
         return 0;
     }
 
+    // Si hay, mostramos la lista disponible y sus ID's
     puts("\nObjetos disponibles para recoger:");
     mostrar_objetos(esc->objetos, 2);
 
+    // Preguntamos por el ID del objeto para poder tomarlo
+    // Ademas verificamos que la entrada sea valida
     printf("\nIngrese el ID del objeto a recoger (0 para cancelar): ");
     int id_elegido;
     if (scanf("%d", &id_elegido) != 1)
@@ -515,14 +537,19 @@ int recoger_items(Jugador* jugador)
         return 0;
     }
 
+    // Si el ID es 0, cancelamos la accion de recoger
     if (id_elegido == 0) {
         puts("Accion cancelada.");
         return 0;
     }
 
-    // Buscar el objeto por ID
+    // Buscamos el objeto por la ID otorgada por el usuario
     for (Objeto* obj = list_first(esc->objetos); obj != NULL; obj = list_next(esc->objetos)) 
     {
+        // Si encontramos el objeto
+        // lo agregamos al inventario del jugador
+        // y actualizamos el peso, puntaje y tiempo de este
+        // ademas lo eliminamos del escenario principal
         if (obj->id == id_elegido) 
         {
             list_pushBack(jugador->inventario, obj);
@@ -530,9 +557,12 @@ int recoger_items(Jugador* jugador)
             jugador->puntaje += obj->puntos;
             jugador->tiempo -= 1;
             list_popCurrent(esc->objetos);
+
+            // Mensaje de confirmacion
             printf("Has recogido: %s\n", obj->nombre);
             printf("Tiempo Restante: %d - 1 = %d\n", jugador->tiempo + 1, jugador->tiempo);
 
+            // Verificacion si es que el tiempo se termina
             if (jugador->tiempo <= 0)
             {
                 puts("\nDERROTA - Se ha agotado el tiempo");
@@ -543,21 +573,27 @@ int recoger_items(Jugador* jugador)
         }
     }
 
+    // Si no existe el objeto con ese ID, habra un aviso
     puts("No existe un objeto con ese ID en este escenario.");
     return 0;
 }
 
+// Funcion para decartar algun item del jugador
 int descartar_items(Jugador* jugador)
 {
+    // Si el jugador no contiene ningun item, habra un aviso
     if (list_first(jugador->inventario) == NULL) 
     {
         printf("No tienes objetos en tu inventario para descartar.\n");
         return 0;
     }
 
+    // Se muestran los objetos del inventario
     puts("\nObjetos en tu inventario:");
     mostrar_objetos(jugador->inventario, 2);
 
+    // Se pregunta por el ID del objeto a descartar
+    // Verificando que la entrada sea valida
     printf("\nIngrese el ID del objeto a descartar (0 para cancelar): ");
     int id_elegido;
     if (scanf("%d", &id_elegido) != 1)
@@ -566,6 +602,7 @@ int descartar_items(Jugador* jugador)
         return 0;
     }
 
+    // Si la accion es cancelada, habra un aviso
     if (id_elegido == 0) {
         printf("Accion cancelada.\n");
         return 0;
@@ -576,6 +613,8 @@ int descartar_items(Jugador* jugador)
     {
         if (obj->id == id_elegido) 
         {
+            // Quitamos el objeto del jugador
+            // y actualizamos el peso y puntaje de este
             jugador->peso_actual -= obj->peso;
             jugador->puntaje -= obj->puntos;
             list_popCurrent(jugador->inventario); // Elimina el objeto del inventario
@@ -583,6 +622,8 @@ int descartar_items(Jugador* jugador)
             jugador->tiempo -= 1;
             printf("Tiempo Restante: %d - 1 = %d\n", jugador->tiempo + 1, jugador->tiempo);
 
+            // Si en la accion, el tiempo es 0, habra un aviso
+            // y el jugador termina.
             if (jugador->tiempo <= 0)
             {
                 puts("DERROTA - Se ha agotado el tiempo");
@@ -593,14 +634,19 @@ int descartar_items(Jugador* jugador)
         }
     }
 
+    // Si no existe un obeto con ese ID habra un aviso
     printf("No existe un objeto con ese ID en tu inventario.\n");
     return 0;
 }
 
+
+// Funcion para avanzar atravez de los escenarios
+// desde donde se encuentre el jugador
 int avanzar(Jugador* jugador)
 {
+    // Tomamos el escenario actual y sus posibles conexiones
     Escenario* esc = jugador->escenario_actual;
-    const char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
+    char* dirs[] = {"ARRIBA", "ABAJO", "IZQUIERDA", "DERECHA"};
     Escenario* conexiones[] = {esc->arriba, esc->abajo, esc->izquierda, esc->derecha};
 
     // Mostrar opciones disponibles
@@ -617,12 +663,15 @@ int avanzar(Jugador* jugador)
         }
     }
 
+    // Si no hay direcciones, habra un aviso
     if (count == 0) 
     {
         printf("No hay caminos disponibles desde aquí.\n");
         return 0;
     }
 
+    // Preguntamos por la direccion a elegir
+    // Verificando que la entrada sea valida
     printf("\nElija una opcion (0 para cancelar): ");
     int eleccion;
     if (scanf("%d", &eleccion) != 1)
@@ -631,6 +680,8 @@ int avanzar(Jugador* jugador)
         return 0;
     }
 
+    // Si ingresa 0, el movimiento es cancelado
+    // Y si esta fuera del rango, habra un aviso
     if (eleccion == 0) 
     {
         puts("Movimiento cancelado.");
@@ -638,25 +689,28 @@ int avanzar(Jugador* jugador)
     }
     else if (eleccion < 0 || eleccion > count)
     {
-        puts("Movimiento no existente");
+        puts("Movimiento no existente.");
         return 0;
     }
 
+    // Indexamos la conexion elegida
+    // y se le establece al jugador
     int dir_idx = opciones[eleccion - 1];
-    Escenario* esc_inicial = jugador->escenario_actual;
     jugador->escenario_actual = conexiones[dir_idx];
-    printf("\nTe has movido de %s hacia %s.\n", esc_inicial->nombre, jugador->escenario_actual->nombre);
+    printf("\nTe has movido de %s hacia %s.\n", esc->nombre, jugador->escenario_actual->nombre);
 
-    // Descontar tiempo: T = ((peso_actual + 1) / 10), mínimo 1
+    // Descontar tiempo: T = ((peso_actual + 1) / 10), minimo 1
     int tiempo_usado = (jugador->peso_actual + 1) / 10;
     if (tiempo_usado < 1) tiempo_usado = 1;
     jugador->tiempo -= tiempo_usado;
     printf("Tiempo Restante: %d - %d = %d\n", jugador->tiempo + tiempo_usado, tiempo_usado, jugador->tiempo);
 
-    // Revisar si se acabó el tiempo
+    // Revisar si se acabo el tiempo
     int en_final = (jugador->escenario_actual->is_final && strcmp(jugador->escenario_actual->is_final, "Si") == 0);
     int sin_tiempo = (jugador->tiempo <= 0);
 
+    // Si llegamos al final, el juego ha terminado y se hara un aviso
+    // Tambien si nos quedamos sin tiempo
     if (en_final) 
     {
         puts("\nFIN - Has llegado a la Salida");
@@ -674,6 +728,8 @@ int avanzar(Jugador* jugador)
     return 1;
 }
 
+// Funcion para reiniciar la partida
+// del modo Solitario o Multijugador
 void reiniciar_partida(int jugadores, Jugador* player1, Jugador* player2, Map** escenarios)
 {
     // Limpiar inventarios de los jugadores
@@ -684,9 +740,10 @@ void reiniciar_partida(int jugadores, Jugador* player1, Jugador* player2, Map** 
     // Limpiar escenarios y recargar el laberinto desde cero
     liberar_escenarios(*escenarios);
     *escenarios = map_create(is_equal_int);
+    puts("Volviendo a cargar el Laberinto...");
     cargar_lab(*escenarios);
 
-    // Reinicializa inventario, puntaje, peso y tiempo usando la función existente
+    // Reinicializa inventario, puntaje, peso y tiempo usando la funcion existente
     iniciar_jugadores(jugadores, player1, player2);
 
     // Asigna el escenario inicial a ambos jugadores
@@ -694,11 +751,13 @@ void reiniciar_partida(int jugadores, Jugador* player1, Jugador* player2, Map** 
     if (jugadores == 2 && player2 != NULL)
         player2->escenario_actual = (Escenario*) map_first(*escenarios)->value;
 
-    printf("La Partida se Reincio.\n");
+    puts("La Partida se Reincio.");
 }
 
+// funcion principal que inicia el juego en modo solitario o multijugador
 void empezar_juego(Map** escenarios, int jugadores)
 {
+    // verifica si el mapa de escenarios esta vacio
     if (map_first(*escenarios) == NULL) 
     {
         puts("No se ha cargado el Juego (Opcion 1)");
@@ -706,20 +765,24 @@ void empezar_juego(Map** escenarios, int jugadores)
     }
 
     limpiarPantalla();
-
+    // Reserva memoria para el o los jugadores segun el modo elegido
     Jugador* player1 = (Jugador*) malloc(sizeof(Jugador));
     Jugador* player2 = (jugadores == 2) ? (Jugador*) malloc(sizeof(Jugador)) : NULL;
-
+    
+    // Inicializa a los jugadores
     iniciar_jugadores(jugadores, player1, player2);
 
+    // Establece el escenario principal para los jugadores
     player1->escenario_actual = (Escenario*) map_first(*escenarios)->value;
     if (jugadores == 2) player2->escenario_actual = (Escenario*) map_first(*escenarios)->value;
 
+    // Variables para controlar el turno de los jugadores
     int turno = 1;
     char opcion;
     
     while(1)
     {
+        // Determina el jugador actual segun el turno
         Jugador* actual = (turno == 1) ? player1 : player2;
 
         puts("========================================");
@@ -729,10 +792,13 @@ void empezar_juego(Map** escenarios, int jugadores)
             puts("         GraphQuest: Multijugador");
         puts("========================================\n");
 
+        // Muestra el inventario, caracteristicas y escenario actual del jugador
         mostrar_estado(actual);
 
+        // En el modo multijugador indica de quien es el turno
         if (jugadores == 2) printf(">>> TURNO DE JUGADOR %d <<<\n\n", turno);
 
+        // Si el jugador actual termino su jugada, se cambia de turno o se omite
         if (actual->terminado) 
         {
             if (jugadores == 2 && player1->terminado) turno = 2;
@@ -740,14 +806,17 @@ void empezar_juego(Map** escenarios, int jugadores)
             continue;
         }
 
+        // Muestra el menu de acciones 
         mostrar_menu(2);
 
         printf("Ingrese su opcion: ");
         scanf(" %c", &opcion);
 
+        // Variables de control para saber si el jugador uso su turno de manera correcta
         int accion_consumida = 0;
         int estaba_terminado = actual->terminado;
-
+        
+        // Se ejecuta la accion segun la elegida por el jugador
         switch (opcion)
         {
             case '1':
@@ -759,17 +828,49 @@ void empezar_juego(Map** escenarios, int jugadores)
             case '3':
                 accion_consumida = avanzar(actual);
                 break;
-            case '4':
-                reiniciar_partida(jugadores, player1, player2, escenarios);
+            case '4': // Reinciar partida, validando si la opcion fue elegida correctamente
+            {
+                int confirmar = 0;
+                puts("Estas seguro que deseas reiniciar la partida?");
+                puts("Todo tu progreso se perdera.");
+                printf(" 1) Si\n 2) No\n");
+                printf("Ingrese su opcion: ");
+                if (scanf("%d", &confirmar) != 1) 
+                {
+                    puts("Entrada no valida. Cancelando reinicio.");
+                    break;
+                }
+                if (confirmar == 1) reiniciar_partida(jugadores, player1, player2, escenarios);
+                else puts("Reinicio cancelado.");
                 break;
-            case '5':
-                liberar_jugador(player1);
-                if (jugadores == 2) liberar_jugador(player2);
-                liberar_escenarios(*escenarios);
-                exit(0);
-                return;
+            }
+            case '5': // Salir del juego, validando si la opcion fue elegida correctamente
+            {
+                int confirmar = 0;
+                puts("Estas seguro que deseas salir de la partida?");
+                puts("Todo tu progreso se perdera.");
+                printf(" 1) Si\n 2) No\n");
+                printf("Ingrese su opcion: ");
+                if (scanf("%d", &confirmar) != 1) 
+                {
+                    puts("Entrada no valida. Cancelando salida.");
+                    break;
+                }
+                if (confirmar == 1) 
+                {
+                    // Libera memoria y cierra el programa
+                    liberar_jugador(player1);
+                    if (jugadores == 2) liberar_jugador(player2);
+                    liberar_escenarios(*escenarios);
+                    exit(0);
+                }
+                else puts("Salida cancelada.");
+                break;
+            }
         }
 
+        // Si el jugador termina el juego se muestran sus resultados, se libera memoria 
+        // y luego se reestablecen los datos para jugar denuevo
         if (jugadores == 1 && actual->terminado) 
         {
             mostrar_terminado(actual);
@@ -780,19 +881,25 @@ void empezar_juego(Map** escenarios, int jugadores)
             cargar_lab(*escenarios);
             break;
         }
-
+        
+        // Solo si es en modo multijugador
         if (jugadores == 2)
         {
+            // Si un jugador termina se muestran sus resultados
             if (!estaba_terminado && actual->terminado && !(player1->terminado && player2->terminado))
             {
                 mostrar_terminado(actual);
             }
 
+            // Si el jugador hizo una accion valida se cambia de turno, 
+            // esto mientras ninguno de los dos jugadores haya terminado
             if (accion_consumida && !player1->terminado && !player2->terminado)
             {
                 turno = (turno == 1) ? 2 : 1;
             }
 
+            // si los dos jugadores han terminado se mostraran los puntajes obtenidos 
+            // y posteriormente se mostrara el resultado final 
             if (player1->terminado && player2->terminado)
             {
                 limpiarPantalla();
