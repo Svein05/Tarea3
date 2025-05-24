@@ -87,6 +87,8 @@ Para comenzar una partida en **modo solitario**, el usuario debe seleccionar la 
 | 4) Salir del Juego                   |
 +--------------------------------------+
 Ingrese su opcion: 2
+```
+```
 ========================================
          GraphQuest: Un Jugador
 ========================================
@@ -126,161 +128,354 @@ Ingrese su opcion: 2
 4) Reiniciar Partida
 5) Volver al Menu Principal
 ========================================
-Ingrese su opcion:
+Ingrese su opcion: _
 ```
-> Durante la partida, el jugador podrá avanzar por los escenarios, tomar decisiones estratégicas, recolectar objetos y administrar su inventario y tiempo disponible. Cada acción influirá en el puntaje final obtenido al completar el laberinto.
-#### 🎤 Buscar música por **Artista**
-Si se desea buscar música por su **Artista**, se debe seleccionar la **opción 3** y luego ingresar el nombre del artista que desea buscar.
+> Durante la partida, el jugador podrá avanzar por los escenarios, tomar decisiones estratégicas, recolectar objetos y administrar su inventario y tiempo disponible. Cada acción influirá en el puntaje final obtenido al completar el laberinto. 
+#### 🧭 Recoleccion de  **Ítems**.
+Para recoger ítems, el jugador debe seleccionar la **opción 1** desde el menú de juego. El sistema mostrará los objetos disponibles en el escenario actual, incluyendo su **ID**, **peso** y **puntos**. Luego, solicitará al usuario que ingrese el **ID del ítem que desea recoger**. 
 ```
-+------------------------------------------------+
-|                   SpotiFind                    |
-+------------------------------------------------+
-|  1) Cargar Canciones                           |
-|  2) Buscar por Genero                          |
-|  3) Buscar por Artista                         |
-|  4) Buscar por Tempo                           |
-|  5) Crear Lista de Reproduccion                |
-|  6) Agregar Cancion a la Lista                 |
-|  7) Mostrar Canciones de una Lista             |
-|  8) Salir del Programa                         |
-+------------------------------------------------+
-Ingrese su opcion: 3
-Ingrese al artista a buscar: Gen Hoshino
-----------------------------------------
-Canciones del artista: Gen Hoshino      
-----------------------------------------
-ID: 0
-Titulo de la cancion: Comedy
-Artista: Gen Hoshino
-Genero: acoustic
-Album: Comedy
-Tempo: 87.92
-----------------------------------------
-...
-Presione una tecla para continuar...
-```
-> El programa mostrará todas las canciones del artista seleccionado por el usuario (*sin distinguir entre **mayúsculas** y **minúsculas***), incluyendo información relevante como su **ID**, **título**, **artista**, **género**, **álbum** y **tempo**. Si el usuario ingresa un artista que **no** se encuentra en el dataset, el programa le informará que el artista no está disponible.
-#### 🎶 Buscar música por **Tempo**
-Si se desea buscar canciones por **Tempo**, se debe seleccionar la **opción 4** y luego elegir el ***rango de tempo*** con el que quiere buscar las canciones: la **opción 1** para canciones lentas, la **opción 2** para canciones moderadas y la **opción 3** para canciones rápidas.
-```
-+------------------------------------------------+
-|                   SpotiFind                    |
-+------------------------------------------------+
-|  1) Cargar Canciones                           |
-|  2) Buscar por Genero                          |
-|  3) Buscar por Artista                         |
-|  4) Buscar por Tempo                           |
-|  5) Crear Lista de Reproduccion                |
-|  6) Agregar Cancion a la Lista                 |
-|  7) Mostrar Canciones de una Lista             |
-|  8) Salir del Programa                         |
-+------------------------------------------------+
-Ingrese su opcion: 4
-Seleccione el rango de tempo:
-1) Lentas (< 80 BPM)
-2) Moderadas (80-120 BPM)
-3) Rapidas (> 120 BPM)
-Ingrese su opcion: 1
-----------------------------------------
-Canciones con tempo entre 0.00 y 80.00
-----------------------------------------
-ID: 1
-Titulo de la cancion: Ghost - Acoustic
-Artista: Ben Woodward
-Genero: acoustic
-Album: Ghost (Acoustic)
-Tempo: 77.49
-----------------------------------------
-ID: 2
-Titulo de la cancion: To Begin Again
-Artistas: Ingrid Michaelson, ZAYN
-Genero: acoustic
-Album: To Begin Again
-Tempo: 76.33
-----------------------------------------
-...
-Presione una tecla para continuar...
-```
-> El programa mostrará todas las canciones asociadas al **rango de tempo** elegido (*sin distinguir entre **mayúsculas** y **minúsculas***), incluyendo datos importantes como su **ID**, **título**, **artista(s)**, **género**, **álbum** y **tempo**. Si se selecciona una opción fuera del rango de tempo, el programa le notificará que la opción elegida no es válida.
-#### 🎵 Crear una **Playlist**.
-Si se desea crear una **Playlist**, deberá seleccionar la **opción 5** y luego ingresar el nombre de la lista de reproducción que desea crear. 
-```
-+------------------------------------------------+
-|                   SpotiFind                    |
-+------------------------------------------------+
-|  1) Cargar Canciones                           |
-|  2) Buscar por Genero                          |
-|  3) Buscar por Artista                         |
-|  4) Buscar por Tempo                           |
-|  5) Crear Lista de Reproduccion                |
-|  6) Agregar Cancion a la Lista                 |
-|  7) Mostrar Canciones de una Lista             |
-|  8) Salir del Programa                         |
-+------------------------------------------------+
-Ingrese su opcion: 5
-Ingrese el nombre de la lista de reproduccion: some acoustic
-Lista de reproduccion 'some acoustic' creada exitosamente.
-Presione una tecla para continuar...
-```
-> El programa mostrará un mensaje indicando si la lista de reproducción fue creada correctamente. Si se intenta crear una nueva lista con el **mismo nombre**, se le informará que ya existe una playlist con ese nombre y será redirigido al menú principal.
-#### 🎶 Agregar una canción a una **Playlist**
-Si se desea **agregar** una canción a una **playlist**, deberá seleccionar la **opción 6**, ingresar el nombre de una **playlist ya creada** y luego proporcionar el **ID** de la canción que desea **agregar**. 
-```
-+------------------------------------------------+
-|                   SpotiFind                    |
-+------------------------------------------------+
-|  1) Cargar Canciones                           |
-|  2) Buscar por Genero                          |
-|  3) Buscar por Artista                         |
-|  4) Buscar por Tempo                           |
-|  5) Crear Lista de Reproduccion                |
-|  6) Agregar Cancion a la Lista                 |
-|  7) Mostrar Canciones de una Lista             |
-|  8) Salir del Programa                         |
-+------------------------------------------------+
-Ingrese su opcion: 6
-Ingrese el nombre de la lista de reproduccion: some acoustic
-Ingrese el ID de la cancion a agregar: 1
-----------------------------------------
-Cancion Agregada a la Lista de Reproduccion 'some acoustic' 
-ID: 1
-Titulo: Ghost - Acoustic
-----------------------------------------
-Presione una tecla para continuar...
-```
-> Si se ingresa el ID de una **playlist inexistente**, se le informará y será redirigido al menú principal. Si proporciona el **ID** de una **canción que ya se encuentra en la playlist**, el programa avisará y también lo llevará de vuelta al menú principal.
-#### 🎶 Visualizar canciones de una **Playlist** 
-Si se desea **visualizar** las canciones de una **playlist**, deberá seleccionar la **opción 7**, ingresar el nombre de una **playlist ya existente** y se mostrarán las canciones por pantalla.
-```
-+------------------------------------------------+
-|                   SpotiFind                    |
-+------------------------------------------------+
-|  1) Cargar Canciones                           |
-|  2) Buscar por Genero                          |
-|  3) Buscar por Artista                         |
-|  4) Buscar por Tempo                           |
-|  5) Crear Lista de Reproduccion                |
-|  6) Agregar Cancion a la Lista                 |
-|  7) Mostrar Canciones de una Lista             |
-|  8) Salir del Programa                         |
-+------------------------------------------------+
-Ingrese su opcion: 7
-Ingrese el nombre de la lista de reproduccion: some acoustic
-----------------------------------------
-Canciones en la lista de reproduccion 'some acoustic':
-----------------------------------------
-ID: 1
-Titulo de la cancion: Ghost - Acoustic
-Artistas: Ben Woodward
-Genero: acoustic
-Album: Ghost (Acoustic)
-Tempo: 77.49
-----------------------------------------
-...
-Presione una tecla para continuar...
-```
-> El programa mostrará en pantalla la **playlist** con su contenido, mostrando datos como el **nombre de la playlist**, seguido de las canciones: **ID**, **título**, **artista**, **género**, **álbum** y **tempo** de cada canción. Si se ingresa el nombre de una **playlist inexistente**, el programa le informará y lo redirigirá al menú. Si ingresa una **playlist** ya creada pero sin contenido, se le informará que la playlist está vacía y también volverá al menú.
+========================================
+         GraphQuest: Un Jugador
+========================================
 
++------------------------------+        
+| ESCENARIO                    |        
++------------------------------+        
+| Cocina                       |        
+|                              |        
+| Restos de una batalla        |        
+| culinaria. Cuchillos por     |        
+| aqui, migajas por alla.      |        
+| Alguien cocinoÔÇª o fue      |        
+| cocinado.                    |        
+|                              |        
+| Acciones Posibles:           |        
+| - ARRIBA                     |        
+| - ABAJO                      |        
+| - DERECHA                    |        
+|                              |
+| Objetos Disponibles:         |
+| - #03 / Cuchillo             |
+|   Peso: 1   /  Puntos: 3     |
+|                              |
+| - #04 / Pan                  |
+|   Peso: 1   /  Puntos: 2     |
+|                              |
++------------------------------+
+
++------------------------------+
+| JUGADOR                      |
++------------------------------+
+| (Inventario Vacio)           |
+| Peso Total: 0                |
+| Puntaje Acumulado: 0         |
+| Tiempo Restante: 9           |
++------------------------------+
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: 1
+
+Objetos disponibles para recoger:
+  #03 - Cuchillo (Peso: 1, Puntos: 3)
+  #04 - Pan (Peso: 1, Puntos: 2)
+
+Ingrese el ID del objeto a recoger (0 para cancelar): 03
+Has recogido: Cuchillo
+Tiempo Restante: 9 - 1 = 8
+Presione una tecla para continuar...
+```
+> Al seleccionar un ítem, el programa verifica que el ID ingresado corresponda a uno válido en el escenario. No es necesario preocuparse por ceros a la izquierda: ingresar (03) o (3) funcionará de igual manera si ese ítem está disponible. Una vez confirmado, el objeto se añade al inventario del jugador, su peso y puntaje se suman, y se descuenta una unidad de tiempo restante como penalización por la acción. Luego, el jugador puede continuar explorando el laberinto.
+
+#### ❌ Descartar Ítems.
+Para descartar ítems, el jugador deberá seleccionar la opcion 2 desde el menú del juego. El sistema mostrará todos los objetos actualmente almacenados en el inventario del jugador, junto a su **ID**, **nombre**, **peso** y **puntos**. Luego, se solicitará el ID del objeto que se desea eliminar.
+```
+========================================
+         GraphQuest: Un Jugador
+========================================
+
++------------------------------+        
+| ESCENARIO                    |        
++------------------------------+        
+| Cocina                       |        
+|                              |        
+| Restos de una batalla        |        
+| culinaria. Cuchillos por     |        
+| aqui, migajas por alla.      |        
+| Alguien cocinoÔÇª o fue      |        
+| cocinado.                    |        
+|                              |        
+| Acciones Posibles:           |        
+| - ARRIBA                     |        
+| - ABAJO                      |        
+| - DERECHA                    |        
+|                              |
+| Objetos Disponibles:         |
+| - #04 / Pan                  |
+|   Peso: 1   /  Puntos: 2     |
+|                              |
++------------------------------+
+
++------------------------------+
+| JUGADOR                      |
++------------------------------+
+| (Inventario Vacio)           |
+| Peso Total: 0                |
+| Puntaje Acumulado: 0         |
+| Tiempo Restante: 9           |
++------------------------------+
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: 2
+
+Objetos en tu inventario:
+  #03 - Cuchillo (Peso: 1, Puntos: 3)
+
+Ingrese el ID del objeto a descartar (0 para cancelar): 03
+Has descartado: Cuchillo.
+Tiempo Restante: 8 - 1 = 7
+Presione una tecla para continuar...
+```
+> Al seleccionar un ítem para descartar, el programa verifica que el ID ingresado exista en el inventario del jugador. No importa si se ingresa el ID con ceros a la izquierda (03) o sin ellos (3), ya que ambos serán interpretados correctamente si el objeto está disponible. Una vez confirmado, el objeto es eliminado del inventario, su peso y puntos se descuentan, y se penaliza al jugador restando una unidad de tiempo restante. Luego de esta acción, el jugador puede seguir su aventura por el laberinto.
+
+#### 🏃‍♂️ Avanzar al siguiente escenario.
+Para avanzar, el jugador debe seleccionar la **opción 3** desde el menú de juego. Al hacerlo, el sistema mostrará por pantalla las direcciones disponibles y los escenarios a los que conducen. El jugador deberá elegir la dirección deseada ingresando el número correspondiente.
+```
+========================================
+         GraphQuest: Un Jugador
+========================================
+
++------------------------------+        
+| ESCENARIO                    |        
++------------------------------+        
+| Cocina                       |        
+|                              |        
+| Restos de una batalla        |        
+| culinaria. Cuchillos por     |        
+| aqui, migajas por alla.      |        
+| Alguien cocinoÔÇª o fue      |        
+| cocinado.                    |        
+|                              |        
+| Acciones Posibles:           |        
+| - ARRIBA                     |        
+| - ABAJO                      |        
+| - DERECHA                    |        
+|                              |
+| Objetos Disponibles:         |
+| - #04 / Pan                  |
+|   Peso: 1   /  Puntos: 2     |
+|                              |
++------------------------------+
+
++------------------------------+
+| JUGADOR                      |
++------------------------------+
+| (Inventario Vacio)           |
+| Peso Total: 0                |
+| Puntaje Acumulado: 0         |
+| Tiempo Restante: 9           |
++------------------------------+
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: 3
+
+Opciones para Avanzar
+ 1) ARRIBA (Entrada principal)
+ 2) ABAJO (Jardin)
+ 3) DERECHA (Comedor)
+
+Elija una opcion (0 para cancelar): 2
+Te has movido de Cocina hacia Jardin.
+Tiempo consumido en el movimiento: 1
+Tiempo restante: 6
+Presione una tecla para continuar...
+```
+> Al elegir la dirección, el programa confirma hacia qué escenario se ha movido el jugador. Luego calcula el tiempo perdido usando la fórmula: Tiempo perdido = ((peso total del inventario + 1) / 10). Esto refleja el esfuerzo adicional que implica moverse con peso. El valor resultante se resta al tiempo restante del jugador. Finalmente, se actualiza la pantalla con la nueva ubicación y el tiempo disponible para continuar explorando el laberinto.
+
+#### 🔁 Reiniciar Partida
+Para reinciar partida, el jugador debe seleccionar la **opcion 4** en el menú del juego.
+```
+========================================
+         GraphQuest: Un Jugador
+========================================
+
++------------------------------+        
+| ESCENARIO                    |        
++------------------------------+        
+| Cocina                       |        
+|                              |        
+| Restos de una batalla        |        
+| culinaria. Cuchillos por     |        
+| aqui, migajas por alla.      |        
+| Alguien cocinoÔÇª o fue      |        
+| cocinado.                    |        
+|                              |        
+| Acciones Posibles:           |        
+| - ARRIBA                     |        
+| - ABAJO                      |        
+| - DERECHA                    |        
+|                              |
+| Objetos Disponibles:         |
+| - #04 / Pan                  |
+|   Peso: 1   /  Puntos: 2     |
+|                              |
++------------------------------+
+
++------------------------------+
+| JUGADOR                      |
++------------------------------+
+| (Inventario Vacio)           |
+| Peso Total: 0                |
+| Puntaje Acumulado: 0         |
+| Tiempo Restante: 9           |
++------------------------------+
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: 4
+¿Estás seguro que deseas reiniciar la partida?
+Todo tu progreso se perderá.
+ 1) Sí
+ 2) No
+Seleccione una opción: 1
+
+La partida ha sido reiniciada correctamente.
+Has vuelto al escenario inicial.
+Presione una tecla para continuar...
+```
+> Al confirmar la opción, el juego reinicia todo el estado del jugador, incluyendo el inventario, puntaje acumulado, tiempo restante y ubicación. Esta función es útil si el jugador queda atascado o desea empezar desde cero para mejorar su desempeño.
+
+#### 🏠 Volver al Menú Principal.
+Para volver al menú principal, el jugador deberá seleccionar la **opción 5** en el menú del juego. Esta acción permite salir de la partida actual y regresar al menú inicial del programa, sin cerrar el juego por completo.
+```
+========================================
+         GraphQuest: Un Jugador
+========================================
+
++------------------------------+        
+| ESCENARIO                    |        
++------------------------------+        
+| Entrada principal            |        
+|                              |        
+| Una puerta rechinante abre   |        
+| paso a esta mansion olvidada |        
+| por los dioses y los         |        
+| conserjes. El aire huele a   |        
+| humedad y a misterios sin    |        
+| resolver.                    |        
+|                              |        
+| Acciones Posibles:           |        
+| - ABAJO                      |        
+|                              |        
+| Objetos Disponibles:         |        
+| - (Sin Items Disponibles)    |        
++------------------------------+        
+
++------------------------------+        
+| JUGADOR                      |        
++------------------------------+        
+| (Inventario Vacio)           |        
+| Peso Total: 0                |        
+| Puntaje Acumulado: 0         |        
+| Tiempo Restante: 10          |        
++------------------------------+        
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: 5
+Presione una tecla para continuar...
+```
+> Al seleccionar esta opción, el jugador regresará al menú principal del juego, donde podrá iniciar una nueva partida (en modo solitario o multijugador) o salir del programa. Esta función permite cambiar el modo de juego sin reiniciar la aplicación.
+
+#### 🏁 Si el jugador llega al final.
+si el jugador llega a la salida se mostrará el siguiente mensaje
+```
+
+```
+#### 👥 Modo Multijugador
+para el modo multijugador se deberá seleccionar desde el menú principal la opcion 3
+```
++--------------------------------------+
+|              GraphQuest              |
++--------------------------------------+
+| 1) Cargar Laberinto                  |
+| 2) Iniciar Partida: Solitario        |
+| 3) Iniciar Partida: Multijugador     |
+| 4) Salir del Juego                   |
++--------------------------------------+
+Ingrese su opcion: 3
+```
+```
+========================================
+         GraphQuest: Multijugador       
+========================================
+
++------------------------------+        
+| ESCENARIO                    |        
++------------------------------+        
+| Entrada principal            |
+|                              |
+| Una puerta rechinante abre   |
+| paso a esta mansion olvidada |
+| por los dioses y los         |
+| conserjes. El aire huele a   |
+| humedad y a misterios sin    |
+| resolver.                    |
+|                              |
+| Acciones Posibles:           |
+| - ABAJO                      |
+|                              |
+| Objetos Disponibles:         |
+| - (Sin Items Disponibles)    |
++------------------------------+
+
++------------------------------+
+| JUGADOR                      |
++------------------------------+
+| (Inventario Vacio)           |
+| Peso Total: 0                |
+| Puntaje Acumulado: 0         |
+| Tiempo Restante: 10          |
++------------------------------+
+
+>>> TURNO DE JUGADOR 1 <<<
+
+========================================
+1) Recoger Item(s)
+2) Descartar Item(s)
+3) Avanzar
+4) Reiniciar Partida
+5) Volver al Menu Principal
+========================================
+Ingrese su opcion: _
+```
 ## Contribuciones
 
 ### Elias Manriquez
@@ -304,4 +499,3 @@ Presione una tecla para continuar...
 - **Desarrollo del README:** Redactó el archivo `README.md` y lo finalizó, documentando de manera clara el funcionamiento, uso y aspectos técnicos del programa.
 
 >Auto-evaluación: 5/5 (Aporte excelente)
-
