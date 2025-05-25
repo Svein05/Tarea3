@@ -897,6 +897,7 @@ void empezar_juego(Map** escenarios, int jugadores)
                     liberar_jugador(player1);
                     if (jugadores == 2) liberar_jugador(player2);
                     liberar_escenarios(*escenarios);
+                    limpiarPantalla();
                     exit(0);
                 }
                 else puts("Salida cancelada.");
