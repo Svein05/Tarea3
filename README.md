@@ -386,7 +386,7 @@ Presione una tecla para continuar...
 > Al elegir la dirección, el programa confirma hacia qué escenario se ha movido el jugador. Luego calcula el tiempo perdido usando la fórmula: Tiempo perdido = ((peso total del inventario + 1) / 10). Esto refleja el esfuerzo adicional que implica moverse con peso. El valor resultante se resta al tiempo restante del jugador. Finalmente, se actualiza la pantalla con la nueva ubicación y el tiempo disponible para continuar explorando el laberinto.
 
 #### 🔁 Reiniciar Partida
-Para reinciar partida, el jugador debe seleccionar la **opcion 4** en el menú del juego.
+Para reiniciar partida, el jugador debe seleccionar la **opcion 4** en el menú del juego.
 ```
 ========================================
          GraphQuest: Un Jugador
