@@ -572,8 +572,6 @@ Presione una tecla para continuar...
 ### Elias Manríquez
 - **Desarrollo de la función principal del juego**: Implementó la lógica central de la aplicación, incluyendo la carga del laberinto desde un archivo CSV y la ejecución de la partida tanto en modo solitario como multijugador.
 
-- **Diseño del menú principal**: Creó la estructura de navegación del menú principal, facilitando el acceso a las distintas funcionalidades del juego.
-
 - **Implementación de funciones clave**: Desarrolló funciones esenciales como avanzar entre escenarios, recoger y descartar ítems, reiniciar la partida, y gestionar el tiempo y el inventario.
 
 - **Documentación básica**: Añadió comentarios al código fuente y contribuyó a la elaboración inicial del `README.md`.
@@ -581,7 +579,7 @@ Presione una tecla para continuar...
 > Auto-evaluación: 5/5 (Aporte Excelente)
 
 ### Maximiliano Rodríguez
-- **Optimización en la carga del laberinto**: Mejoró la eficiencia del proceso de carga desde archivos CSV grandes, asegurando un manejo más rápido y estable.
+- **Diseño del menú principal**: Creó la estructura de navegación del menú principal, facilitando el acceso a las distintas funcionalidades del juego.
 
 - **Manejo de errores y validaciones**: Implementó validaciones de entrada del usuario y control de errores para evitar fallos durante la ejecución del juego.
 
