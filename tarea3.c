@@ -515,7 +515,7 @@ void cargar_lab(Map* escenarios)
 // donde se encuentra el jugador.
 int recoger_items(Jugador* jugador)
 {
-    // Verificamos que en el escenario hay objetos
+    // Toamos el escenario actual del jugador
     Escenario* esc = jugador->escenario_actual;
     if (list_first(esc->objetos) == NULL) 
     {
@@ -523,59 +523,94 @@ int recoger_items(Jugador* jugador)
         return 0;
     }
 
-    // Si hay, mostramos la lista disponible y sus ID's
-    puts("\nObjetos disponibles para recoger:");
-    mostrar_objetos(esc->objetos, 2);
-
-    // Preguntamos por el ID del objeto para poder tomarlo
-    // Ademas verificamos que la entrada sea valida
-    printf("\nIngrese el ID del objeto a recoger (0 para cancelar): ");
-    int id_elegido;
-    if (scanf("%d", &id_elegido) != 1)
+    // Se hace un ciclo por si el jugador quiere recoger
+    // uno o mas items del escenario, lo verificamos
+    // con una variable auxiliar.
+    int recogio_algo = 0;
+    List* recogidos = list_create(); // Lista temporal para los objetos recogidos
+    while (list_first(esc->objetos) != NULL) 
     {
-        puts("Error: Entrada no valida.");
-        return 0;
-    }
+        // Se muestra la lista de objetos para recoger
+        puts("\nObjetos disponibles para recoger:");
+        mostrar_objetos(esc->objetos, 2);
 
-    // Si el ID es 0, cancelamos la accion de recoger
-    if (id_elegido == 0) {
-        puts("Accion cancelada.");
-        return 0;
-    }
-
-    // Buscamos el objeto por la ID otorgada por el usuario
-    for (Objeto* obj = list_first(esc->objetos); obj != NULL; obj = list_next(esc->objetos)) 
-    {
-        // Si encontramos el objeto
-        // lo agregamos al inventario del jugador
-        // y actualizamos el peso, puntaje y tiempo de este
-        // ademas lo eliminamos del escenario principal
-        if (obj->id == id_elegido) 
+        // Preguntamos por el ID del objeto
+        printf("\nIngrese el ID del objeto a recoger (0 para cancelar): ");
+        int id_elegido;
+        if (scanf("%d", &id_elegido) != 1) 
         {
-            list_pushBack(jugador->inventario, obj);
-            jugador->peso_actual += obj->peso;
-            jugador->puntaje += obj->puntos;
-            jugador->tiempo -= 1;
-            list_popCurrent(esc->objetos);
+            puts("Error: Entrada no valida.");
+            break;
+        }
 
-            // Mensaje de confirmacion
-            printf("Has recogido: %s\n", obj->nombre);
-            printf("Tiempo Restante: %d - 1 = %d\n", jugador->tiempo + 1, jugador->tiempo);
+        // Si es 0, signifca que el usuario ya no quiere
+        // recoger mas items
+        if (id_elegido == 0) {
+            if (!recogio_algo) puts("Accion cancelada.");
+            break;
+        }
 
-            // Verificacion si es que el tiempo se termina
-            if (jugador->tiempo <= 0)
+        // Buscamos atravez de la lista de objetos del escenario
+        // el ID que otorgo el usuario
+        int encontrado = 0;
+        for (Objeto* obj = list_first(esc->objetos); obj != NULL; obj = list_next(esc->objetos)) 
+        {
+            if (obj->id == id_elegido) 
             {
-                puts("\nDERROTA - Se ha agotado el tiempo");
-                jugador->terminado = 1;
-            }
+                /*
+                Si encontrramos el objeto, lo ingresamos
+                al inventario del usuario y lo quitamos
+                del escenario. Actualizando tambien el peso
+                puntaje y tiempo el jugador
+                */
+                list_pushBack(jugador->inventario, obj);
+                jugador->peso_actual += obj->peso;
+                jugador->puntaje += obj->puntos;
+                jugador->tiempo -= 1;
+                list_pushBack(recogidos, obj);
+                list_popCurrent(esc->objetos);
 
-            return 1;
+                // Se hara un mensajde de finalizacion
+                printf("Has recogido: %s\n", obj->nombre);
+                printf("Tiempo Restante: %d\n", jugador->tiempo);
+
+                // Si se agota el tiempo con esa accion
+                // habra un mensaje de derrota
+                if (jugador->tiempo <= 0) 
+                {
+                    puts("\nDERROTA - Se ha agotado el tiempo");
+                    jugador->terminado = 1;
+                    return 1;
+                }
+
+                // Actualizamos las variables auxiliares
+                recogio_algo = 1;
+                encontrado = 1;
+                break;
+            }
+        }
+        // Si no fue encontrado un objeto con el ID se avisara.
+        if (!encontrado) puts("\nNo existe un objeto con ese ID en este escenario.");
+
+        // Si ya no hay objetos, termina el ciclo
+        if (list_first(esc->objetos) == NULL) 
+        {
+            puts("\nNo quedan mas objetos para recoger en este escenario.");
+            break;
         }
     }
 
-    // Si no existe el objeto con ese ID, habra un aviso
-    puts("No existe un objeto con ese ID en este escenario.");
-    return 0;
+    if (list_size(recogidos) > 1)
+    {
+        puts("\nResumen de items recogidos en este turno:");
+        mostrar_objetos(recogidos,2);
+    }
+
+    list_clean(recogidos);
+    free(recogidos);
+
+    // Retornamos si fue un movimiento exitoso
+    return recogio_algo;
 }
 
 // Funcion para decartar algun item del jugador
